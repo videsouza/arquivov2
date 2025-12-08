@@ -3,52 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serviços de Gerenciamento de Arquivo | [Seu Nome/Empresa]</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Hub de Serviços | Gestão Documental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Variáveis de Cor Minimalistas */
+        :root {
+            --primary-color: #f7931e; /* Laranja/Ambar (Toque de cor) */
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f9f9f9;
+            --bg-white: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* --- ESTILOS BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- HERO SECTION (CABEÇALHO) --- */
+        .hero {
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 60px;
+            padding: 20px 0;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        /* --- ESTATÍSTICAS (Minimalista) --- */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 20px 0;
+            margin-bottom: 60px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeInUp 1s ease;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dark);
+        }
+
+        .stat-icon {
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .stat-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .stat-value { font-weight: 700; font-size: 20px; color: var(--text-dark); }
+        .stat-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; font-weight: 600; color: var(--text-light); }
+
+        /* --- GRID DE SERVIÇOS --- */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+            transition: all 0.3s ease-in-out;
+            box-shadow: var(--shadow-subtle);
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            color: inherit;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        /* Badge (Mais Discreto) */
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--bg-white);
+        }
+        .badge-new { background-color: #34d399; } /* Verde suave */
+        .badge-popular { background-color: var(--primary-color); }
+
+        /* Ícone do Serviço */
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(247, 147, 30, 0.1); /* Fundo sutil com a primary color */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .service-card:hover .card-icon {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        /* Lista de Recursos */
+        .features-list {
+            list-style: none;
+            margin-top: auto;
+            padding-top: 10px; /* Espaçamento da descrição */
+        }
+
+        .features-list li {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .features-list li i { color: #34d399; font-size: 10px; } /* Ícone de check em verde */
+
+        /* Botão Fantasma */
+        .card-action {
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .service-card:hover .card-action {
+            gap: 10px;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            margin-top: 80px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .footer p { margin: 5px 0; }
+        .footer a { color: var(--primary-color); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        /* Animações e Responsividade */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .stats-bar { flex-direction: column; gap: 20px; }
+            .stat-item { justify-content: center; }
+        }
+    </style>
 </head>
 <body>
 
-    <header class="hero">
-        <div class="container">
-            <h1>Otimize seu Arquivo. Simplifique sua Gestão.</h1>
-            <p>Soluções modernas e eficientes para a organização e preservação de seus documentos.</p>
-            <a href="#services" class="cta-button">Ver Nossos Serviços</a>
-        </div>
-    </header>
+    <div class="container">
+        
+        <header class="hero">
+            <h1>O Seu Hub de Gestão Documental Inteligente</h1>
+            <p>Acesse ferramentas essenciais para otimizar, analisar e preservar seu arquivo com eficiência e modernidade. (Versão Beta)</p>
+        </header>
 
-    <section id="services" class="services">
-        <div class="container">
-            <h2>Nossos Serviços</h2>
-            <div class="card-grid">
-                
-                <div class="card">
-                    <h3>Organização & Classificação</h3>
-                    <p>Estruturamos seu acervo documental seguindo normas arquivísticas, garantindo fácil localização e recuperação da informação.</p>
-                    <a href="#" class="card-link">Saiba Mais &rarr;</a>
+        <section class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-text">
+                    <span class="stat-value">6+</span>
+                    <span class="stat-label">Ferramentas Ativas</span>
                 </div>
-
-                <div class="card">
-                    <h3>Digitalização Inteligente</h3>
-                    <p>Transformamos documentos físicos em digitais com metadados e reconhecimento de texto (OCR), preservando e agilizando o acesso.</p>
-                    <a href="#" class="card-link">Saiba Mais &rarr;</a>
-                </div>
-
-                <div class="card">
-                    <h3>Consultoria em Tabela de Temporalidade</h3>
-                    <p>Avaliamos e definimos os prazos de guarda dos documentos, facilitando a eliminação segura e legal de itens sem valor.</p>
-                    <a href="#" class="card-link">Saiba Mais &rarr;</a>
-                </div>
-
             </div>
-        </div>
-    </section>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-rocket"></i></div>
+                <div class="stat-text">
+                    <span class="stat-value">Rápido</span>
+                    <span class="stat-label">Processamento Instantâneo</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-lock"></i></div>
+                <div class="stat-text">
+                    <span class="stat-value">Local</span>
+                    <span class="stat-label">Segurança de Dados</span>
+                </div>
+            </div>
+        </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 [Seu Nome/Empresa]. Todos os direitos reservados. | Contato: [Seu Email]</p>
-        </div>
-    </footer>
+        <section class="services-grid">
+
+            <a href="super-analista.html" class="service-card">
+                <div class="badge badge-popular">Popular</div>
+                <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3 class="card-title">Análise de Dados Arquivísticos</h3>
+                <p class="card-desc">Dashboard completo com gráficos e insights automáticos a partir de planilhas de acervo.</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Gráficos Interativos</li>
+                    <li><i class="fas fa-check"></i> Insights IA</li>
+                    <li><i class="fas fa-check"></i> Análise de Frequência</li>
+                </ul>
+                <div class="card-action">Acessar Ferramenta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="eliminar-claude-v2.html" class="service-card">
+                <div class="badge badge-new">Novo</div>
+                <div class="card-icon"><i class="fas fa-recycle"></i></div>
+                <h3 class="card-title">Otimizador de Eliminação</h3>
+                <p class="card-desc">Algoritmo inteligente para criar blocos de eliminação maximizando documentos por caixa.</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Algoritmo Multi-Estratégia</li>
+                    <li><i class="fas fa-check"></i> Restrições Personalizáveis</li>
+                    <li><i class="fas fa-check"></i> Exportação Excel</li>
+                </ul>
+                <div class="card-action">Otimizar Agora <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="etiqueta-gemini.html" class="service-card">
+                 <div class="badge badge-new">Novo</div>
+                <div class="card-icon"><i class="fas fa-print"></i></div>
+                <h3 class="card-title">Impressor de Etiquetas</h3>
+                <p class="card-desc">Geração automática de etiquetas padronizadas (9x9cm) prontas para impressão em A4.</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Layout 2x3 A4</li>
+                    <li><i class="fas fa-check"></i> Design Padronizado</li>
+                    <li><i class="fas fa-check"></i> Preenchimento Automático</li>
+                </ul>
+                <div class="card-action">Criar Etiquetas <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="visualiza-boxes-gemini.html" class="service-card">
+                <div class="card-icon"><i class="fas fa-boxes"></i></div>
+                <h3 class="card-title">Visualizador de Boxes</h3>
+                <p class="card-desc">Mapa visual interativo para gestão espacial e ocupação do arquivo físico (visão 7x7).</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Mapeamento de Ocupação</li>
+                    <li><i class="fas fa-check"></i> Status por Cor</li>
+                    <li><i class="fas fa-check"></i> Estatísticas em Tempo Real</li>
+                </ul>
+                <div class="card-action">Gerar Visualização <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+             <a href="https://corretor-datas.onrender.com/" class="service-card">
+               <div class="badge badge-popular">Popular</div>
+                <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3 class="card-title">Corretor de Datas</h3>
+                <p class="card-desc">Verifica se as datas prováveis de eliminação (DPE) na sua planilha estão corretas.</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-clock"></i> Análise de PDF</li>
+                    <li><i class="fas fa-clock"></i> Relatório de Erros</li>
+                    <li><i class="fas fa-clock"></i> Cálculos com Tabela de Temporalidade</li>
+                </ul>
+                <div class="card-action">Corrigir Planilha <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="#" class="service-card">
+                <div class="card-icon"><i class="fas fa-sitemap"></i></div>
+                <h3 class="card-title">Organograma Dinâmico</h3>
+                <p class="card-desc">Crie e visualize a estrutura hierárquica da sua organização de forma rápida e intuitiva.</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Edição em Tempo Real</li>
+                    <li><i class="fas fa-check"></i> Exportação PNG/PDF</li>
+                    <li><i class="fas fa-check"></i> Visualização Limpa</li>
+                </ul>
+                <div class="card-action">Em Desenvolvimento <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2025 Sistema de Gestão Documental. Todos os direitos reservados.</p>
+            <p>
+                Desenvolvido por Vinicius A. de Souza | <a href="#">Termos de Uso</a>
+            </p>
+        </footer>
+
+    </div>
 
 </body>
 </html>
