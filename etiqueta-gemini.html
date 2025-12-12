@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressor de Etiquetas | Hub de Serviços</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* --- VARIÁVEIS E CORES (Minimalista/Clean) --- */
+        :root {
+            --primary: #f7931e;        /* Laranja/Âmbar */
+            --primary-dark: #d67d12;
+            --text-main: #1f2937;      /* Cinza Chumbo */
+            --text-sub: #6b7280;       /* Cinza Médio */
+            --bg-body: #f3f4f6;        /* Fundo da página leve */
+            --bg-card: #ffffff;        /* Fundo dos cards */
+            --border: #e5e7eb;         /* Bordas sutis */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- RESET E BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        .app-header {
+            padding: 30px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        .header-title h1 i { color: var(--primary); margin-right: 10px; }
+        .header-desc { font-size: 14px; color: var(--text-sub); margin-top: 4px; }
+
+        .app-content { padding: 40px; }
+
+        /* --- SEÇÕES DO FORMULÁRIO --- */
+        .form-section { margin-bottom: 40px; }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .step-num {
+            background: var(--primary); color: white; width: 24px; height: 24px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 800;
+        }
+
+        /* --- INPUT DE BUSCA --- */
+        .search-container { position: relative; }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+        .input-group:focus-within { border-color: var(--primary); background: #fff; }
+        
+        .input-group i { color: var(--text-sub); margin-right: 12px; font-size: 18px; }
+        
+        .search-input {
+            flex: 1; border: none; background: transparent; font-size: 16px;
+            font-family: 'Inter', sans-serif; color: var(--text-main);
+        }
+        .search-input::placeholder { color: #9ca3af; }
+
+        .search-results {
+            position: absolute; top: 100%; left: 0; right: 0;
+            max-height: 250px; overflow-y: auto;
+            border: 1px solid var(--border); border-top: none;
+            border-radius: 0 0 10px 10px;
+            background: white; z-index: 100;
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+        .search-results.show { display: block; }
+        
+        .search-item {
+            padding: 12px 15px; cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.1s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-item:hover { background: #f9fafb; }
+        .search-code { font-weight: 700; color: var(--primary); background: #fff7ed; padding: 4px 8px; border-radius: 6px; font-size: 14px; }
+        .search-name { font-size: 15px; color: var(--text-main); }
+
+        .selected-unit-card {
+            background: #fff7ed; /* Laranja muito claro */
+            border: 1px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .selected-unit-card.show { display: flex; align-items: center; gap: 15px; }
+        .selected-icon { font-size: 24px; color: var(--primary); }
+        .selected-label { font-size: 13px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; }
+        .selected-value { font-size: 18px; font-weight: 700; color: var(--text-main); }
+        .selected-value strong { color: var(--primary); }
+
+        /* --- GRID DE TIPOS --- */
+        .tipo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        
+        .tipo-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .tipo-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        
+        .tipo-card.selected {
+            border-color: var(--primary);
+            background: #fffbf5; /* Laranja muito claro */
+            box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.1);
+        }
+        
+        .tipo-header { display: flex; align-items: center; justify-content: space-between; }
+        .tipo-icon { font-size: 24px; color: var(--text-sub); transition: color 0.2s; }
+        .tipo-card.selected .tipo-icon { color: var(--primary); }
+        .tipo-check { 
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center; color: white; transition: all 0.2s;
+        }
+        .tipo-card.selected .tipo-check { border-color: var(--primary); background: var(--primary); }
+        .tipo-check i { font-size: 14px; opacity: 0; transition: opacity 0.2s; }
+        .tipo-card.selected .tipo-check i { opacity: 1; }
+
+        .tipo-title { font-weight: 700; font-size: 18px; color: var(--text-main); }
+        .tipo-desc { color: var(--text-sub); font-size: 14px; line-height: 1.4; }
+
+        /* --- BOTÕES --- */
+        .btn-container { margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border); }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--primary); color: white; width: 100%;
+            box-shadow: 0 4px 6px rgba(247, 147, 30, 0.25);
+        }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:disabled { background: #d1d5db; cursor: not-allowed; box-shadow: none; color: #9ca3af; }
+        
+        .btn-secondary {
+            background: white; border: 1px solid var(--border); color: var(--text-main);
+        }
+        .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
+        
+        .btn-danger { background: #fee2e2; color: #b91c1c; }
+        .btn-danger:hover { background: #fecaca; }
+
+        /* --- ÁREA DE PREVIEW --- */
+        .preview-section {
+            display: none;
+            background: #fff;
+            padding: 40px;
+            border-top: 1px solid var(--border);
+            animation: slideUp 0.4s ease;
+        }
+        .preview-section.show { display: block; }
+        
+        .preview-controls {
+            margin-bottom: 30px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;
+            background: #f9fafb; padding: 20px; border-radius: 12px; border: 1px solid var(--border);
+        }
+        .control-group { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .control-label { font-weight: 600; color: var(--text-main); }
+        .control-input { 
+            width: 80px; padding: 8px 12px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 16px; text-align: center; font-weight: 600;
+        }
+
+        /* --- ESTILOS DAS ETIQUETAS (DESIGN FINAL 9x9cm) --- */
+        .etiquetas-page {
+            background: white;
+            width: 180mm; height: 270mm; /* Grade 2x3 de 90mm */
+            margin: 0 auto 30px auto;
+            padding: 0; /* Padding removido, controle de margem via @page na impressão */
+            box-shadow: var(--shadow-md);
+            display: grid;
+            grid-template-columns: repeat(2, 90mm);
+            grid-template-rows: repeat(3, 90mm);
+            gap: 0;
+            box-sizing: border-box;
+            border: 1px solid #e5e7eb; /* Borda sutil na visualização */
+        }
+        
+        .etiqueta {
+            border: 1px solid #d1d5db; /* Linha de corte mais sutil na visualização */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            width: 90mm; height: 90mm;
+            position: relative;
+            color: #000; /* Texto sempre preto para impressão */
+        }
+
+        /* Cabeçalho */
+        .etiqueta-header {
+            background-color: #f3f4f6; 
+            padding: 10px 12px;
+            border-bottom: 2px solid #374151;
+            text-align: center;
+        }
+        .etiqueta-header-title {
+            font-size: 8pt; text-transform: uppercase; color: #4b5563;
+            letter-spacing: 0.5px; font-weight: 700; margin-bottom: 4px;
+        }
+        .etiqueta-header-unit {
+            font-size: 10pt; font-weight: 700; color: #111827; line-height: 1.2;
+        }
+        .etiqueta-header-unit strong { font-size: 12pt; margin-right: 5px; font-weight: 800; }
+
+        /* Corpo */
+        .etiqueta-body {
+            padding: 12px 15px; flex: 1;
+            display: flex; flex-direction: column; justify-content: flex-start; gap: 5px;
+        }
+        .etiqueta-row {
+            display: flex; align-items: baseline; padding: 4px 0;
+            border-bottom: 1px dotted #e5e7eb;
+        }
+        .etiqueta-row:last-child { border-bottom: none; }
+        .etiqueta-label {
+            font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #6b7280; min-width: 85px;
+        }
+        .etiqueta-value {
+            font-size: 9pt; font-family: 'Inter', sans-serif; font-weight: 600; color: #374151; flex: 1;
+        }
+        
+        /* Campo de Descrição */
+        .descricao-box {
+            border: 1px dotted #d1d5db;
+            height: 45px; width: 100%;
+            margin-top: 5px;
+        }
+
+        /* Rodapé (Status) */
+        .etiqueta-footer {
+            padding: 8px; text-align: center; border-top: 2px solid #374151;
+            font-weight: 800; font-size: 9pt; text-transform: uppercase;
+        }
+
+        /* Estilos Específicos por Tipo */
+        /* Eliminação */
+        .status-eliminacao { background: #fff; color: #1f2937; }
+        .status-eliminacao .footer-date { font-weight: 400; font-size: 8pt; display: block; margin-top: 2px; }
+        
+        /* Permanente */
+        .status-permanente { background: #1f2937; color: white; }
+        
+        /* Amostragem (Novo Modelo) */
+        .etiqueta-amostragem .etiqueta-header { background-color: #e5e7eb; border-bottom-color: #1f2937; }
+        .etiqueta-amostragem .etiqueta-body { padding-bottom: 5px; } /* Menos padding embaixo */
+        
+        .amostragem-footer-container {
+            display: flex;
+            border-top: 2px solid #1f2937;
+        }
+        .amostragem-qtd {
+            width: 35%;
+            border-right: 2px solid #1f2937;
+            padding: 5px;
+            text-align: center;
+            background: #f3f4f6;
+        }
+        .amostragem-sep {
+            flex: 1;
+            padding: 5px;
+            text-align: center;
+            background: #f3f4f6;
+        }
+        .amostragem-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; color: #6b7280; display: block; margin-bottom: 2px;}
+        .amostragem-input { font-size: 9pt; font-weight: 600; color: #374151; }
+
+        .status-amostragem {
+            background: #1f2937; color: white; padding: 6px; font-size: 8.5pt; border-top: none;
+        }
+
+        /* Linhas de corte pontilhadas para visualização */
+        .cut-lines {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+            border: 1px dashed #d1d5db; margin: -1px; z-index: 10;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- MODO DE IMPRESSÃO --- */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .app-container { box-shadow: none; max-width: none; border: none; border-radius: 0; }
+            .app-header, .app-content > *:not(.preview-section) { display: none !important; }
+            .preview-section { display: block !important; padding: 0; border: none; margin: 0; animation: none; }
+            .preview-controls { display: none !important; }
+            
+            @page {
+                size: A4;
+                /* Margens exatas para centralizar a grade 180x270mm na folha A4 */
+                /* Top: 13.5mm, Bottom: 13.5mm, Left: 15mm, Right: 15mm */
+                margin: 13.5mm 15mm;
+            }
+            
+            .etiquetas-page {
+                margin: 0; box-shadow: none; page-break-after: always; border: none;
+            }
+
+            .etiqueta {
+                /* Bordas pretas finas para corte na impressão */
+                border: 0.5pt solid #000;
+            }
+            
+            /* Força cores exatas na impressão */
+            .etiqueta-header { background-color: #f3f4f6 !important; border-bottom-color: #000 !important; }
+            .etiqueta-row { border-bottom-color: #ccc !important; }
+            .descricao-box { border-color: #ccc !important; }
+            .etiqueta-footer { border-top-color: #000 !important; }
+            
+            .status-permanente, .status-amostragem { background: #000 !important; color: #fff !important; }
+            .amostragem-footer-container { border-top-color: #000 !important; }
+            .amostragem-qtd, .amostragem-sep { border-right-color: #000 !important; background: #f3f4f6 !important; }
+
+            .cut-lines { display: none; } /* Remove linhas pontilhadas na impressão final */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-title">
+                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas Pro</h1>
+                <p class="header-desc">Geração rápida de etiquetas padronizadas (9x9cm)</p>
+            </div>
+        </header>
+
+        <div class="app-content">
+            
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="step-num">1</span>
+                    Selecione a Unidade Produtora
+                </h2>
+                
+                <div class="search-container">
+                    <div class="input-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Digite o código (ex: 1344) ou nome da secretaria..." autocomplete="off">
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+
+                <div class="selected-unit-card" id="selectedUnit">
+                    <i class="fas fa-building selected-icon"></i>
+                    <div>
+                        <div class="selected-label">Unidade Selecionada:</div>
+                        <div class="selected-value" id="selectedUnitText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="step-num">2</span>
+                    Escolha o Tipo de Etiqueta
+                </h2>
+                
+                <div class="tipo-grid">
+                    <div class="tipo-card selected" data-tipo="eliminacao" onclick="selecionarTipo('eliminacao')">
+                        <div class="tipo-header">
+                            <i class="fas fa-recycle tipo-icon"></i>
+                            <div class="tipo-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="tipo-title">Eliminação</div>
+                        <p class="tipo-desc">Para documentos temporários que possuem uma data de descarte definida na Tabela de Temporalidade.</p>
+                    </div>
+                    
+                    <div class="tipo-card" data-tipo="permanente" onclick="selecionarTipo('permanente')">
+                        <div class="tipo-header">
+                            <i class="fas fa-archive tipo-icon"></i>
+                            <div class="tipo-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="tipo-title">Guarda Permanente</div>
+                        <p class="tipo-desc">Para documentos de valor histórico, probatório ou informativo que devem ser preservados para sempre.</p>
+                    </div>
+
+                    <div class="tipo-card" data-tipo="amostragem" onclick="selecionarTipo('amostragem')">
+                        <div class="tipo-header">
+                            <i class="fas fa-chart-pie tipo-icon"></i>
+                            <div class="tipo-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="tipo-title">Amostragem (Permanente)</div>
+                        <p class="tipo-desc">Para a parcela representativa de um conjunto documental selecionada para guarda permanente. Inclui campos de quantidade.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn btn-primary" id="btnGerar" onclick="gerarPreview()" disabled>
+                    <i class="fas fa-print"></i> Gerar e Visualizar Etiquetas
+                </button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-controls">
+                <div class="control-group">
+                    <label class="control-label"><i class="fas fa-copy"></i> Quantidade de Etiquetas:</label>
+                    <input type="number" id="numCopias" class="control-input" value="6" min="1" max="60">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="atualizarPreview()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir Agora
+                    </button>
+                    <button class="btn btn-danger" style="padding: 14px;" onclick="fecharPreview()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="etiquetasContainer" style="display: flex; flex-direction: column; align-items: center;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DADOS SIMULADOS ---
+        const unidades = [
+            { codigo: "1", nome: "GABINETE DO PREFEITO" },
+            { codigo: "2", nome: "SECRETARIA MUNICIPAL DE GOVERNO" },
+            { codigo: "3", nome: "SECRETARIA MUNICIPAL DE ADMINISTRAÇÃO" },
+            { codigo: "4", nome: "SECRETARIA MUNICIPAL DE FINANÇAS" },
+            { codigo: "11", nome: "SECRETARIA MUNICIPAL DE EDUCAÇÃO" },
+            { codigo: "12", nome: "SECRETARIA MUNICIPAL DE SAÚDE" },
+            { codigo: "1344", nome: "SEC. MUNICIPAL DE EDUCAÇÃO" },
+            { codigo: "301", nome: "RH - RECURSOS HUMANOS" },
+            { codigo: "401", nome: "CONTABILIDADE E TESOURARIA" }
+        ];
+
+        // --- ESTADO DA APLICAÇÃO ---
+        let unidadeSelecionada = null;
+        let tipoSelecionado = 'eliminacao'; // Padrão inicial
+
+        // --- ELEMENTOS DOM ---
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const selectedUnitCard = document.getElementById('selectedUnit');
+        const selectedUnitText = document.getElementById('selectedUnitText');
+        const btnGerar = document.getElementById('btnGerar');
+        const previewSection = document.getElementById('previewSection');
+        const numCopiasInput = document.getElementById('numCopias');
+
+        // --- LÓGICA DE BUSCA ---
+        searchInput.addEventListener('input', function() {
+            const termo = this.value.toLowerCase().trim();
+            if (termo.length < 1) { searchResults.classList.remove('show'); return; }
+
+            const resultados = unidades.filter(u => u.codigo.includes(termo) || u.nome.toLowerCase().includes(termo));
+
+            if (resultados.length > 0) {
+                searchResults.innerHTML = resultados.map(u => `
+                    <div class="search-item" onclick="selecionarUnidade('${u.codigo}', '${u.nome}')">
+                        <span class="search-code">${u.codigo}</span>
+                        <span class="search-name">${u.nome}</span>
+                    </div>
+                `).join('');
+            } else {
+                searchResults.innerHTML = '<div style="padding:15px 20px; color:#9ca3af;">Nenhuma unidade encontrada.</div>';
+            }
+            searchResults.classList.add('show');
+        });
+
+        // Fechar busca ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('show');
+            }
+        });
+
+        // --- AÇÕES DE SELEÇÃO ---
+        function selecionarUnidade(codigo, nome) {
+            unidadeSelecionada = { codigo, nome };
+            searchInput.value = ''; // Limpa o input
+            searchResults.classList.remove('show');
+            
+            selectedUnitText.innerHTML = `<strong>${codigo}</strong> - ${nome}`;
+            selectedUnitCard.classList.add('show');
+            
+            verificarEstadoBotao();
+        }
+
+        function selecionarTipo(tipo) {
+            tipoSelecionado = tipo;
+            document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`[data-tipo="${tipo}"]`).classList.add('selected');
+            verificarEstadoBotao();
+            if(previewSection.classList.contains('show')) atualizarPreview(); // Atualiza se o preview estiver aberto
+        }
+
+        function verificarEstadoBotao() {
+            // Botão habilita se houver unidade e tipo selecionados
+            btnGerar.disabled = !(unidadeSelecionada && tipoSelecionado);
+        }
+
+        // --- LÓGICA DE PREVIEW E GERAÇÃO ---
+        function gerarPreview() {
+            previewSection.classList.add('show');
+            atualizarPreview();
+            // Scroll suave até o preview
+            setTimeout(() => {
+                previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function fecharPreview() {
+            previewSection.classList.remove('show');
+            // Volta o scroll para o topo
+            document.querySelector('.app-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function atualizarPreview() {
+            const numCopias = parseInt(numCopiasInput.value) || 6;
+            const container = document.getElementById('etiquetasContainer');
+            const etiquetasPorPagina = 6;
+            const numPaginas = Math.ceil(numCopias / etiquetasPorPagina);
+            
+            let html = '';
+            
+            for (let pagina = 0; pagina < numPaginas; pagina++) {
+                html += '<div class="etiquetas-page">';
+                const qtdNestaPagina = Math.min(etiquetasPorPagina, numCopias - (pagina * etiquetasPorPagina));
+                
+                for (let i = 0; i < qtdNestaPagina; i++) {
+                    html += gerarHtmlEtiqueta();
+                }
+                // Preencher com espaços vazios invisíveis para manter o grid alinhado na última página
+                for (let i = qtdNestaPagina; i < etiquetasPorPagina; i++) {
+                     html += '<div style="visibility: hidden; width: 90mm; height: 90mm;"></div>';
+                }
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        // --- GERADOR DE HTML DA ETIQUETA ---
+        function gerarHtmlEtiqueta() {
+            if (!unidadeSelecionada || !tipoSelecionado) return '';
+
+            const uCod = unidadeSelecionada.codigo;
+            const uNome = unidadeSelecionada.nome;
+            let etiquetaClass = '';
+            let footerHtml = '';
+            let bodyExtraHtml = ''; // Para campos extras da amostragem
+
+            switch(tipoSelecionado) {
+                case 'eliminacao':
+                    footerHtml = `
+                        <div class="etiqueta-footer status-eliminacao">
+                            ELIMINAÇÃO
+                            <span class="footer-date">EM: 31 / 12 / _ _ _ _</span>
+                        </div>`;
+                    break;
+                case 'permanente':
+                    footerHtml = `
+                        <div class="etiqueta-footer status-permanente">
+                            GUARDA PERMANENTE
+                        </div>`;
+                    break;
+                case 'amostragem':
+                    etiquetaClass = 'etiqueta-amostragem';
+                    // Adiciona os campos de quantidade ANTES do rodapé
+                    bodyExtraHtml = `
+                        <div class="amostragem-footer-container">
+                            <div class="amostragem-qtd">
+                                <span class="amostragem-label">Quantidade</span>
+                                <span class="amostragem-input">____ cm</span>
+                            </div>
+                            <div class="amostragem-sep">
+                                <span class="amostragem-label">Separado por Amostragem</span>
+                                <span class="amostragem-input">___/___/____</span>
+                            </div>
+                        </div>`;
+                    footerHtml = `
+                        <div class="etiqueta-footer status-amostragem">
+                            GUARDA PERMANENTE (AMOSTRAGEM)
+                        </div>`;
+                    break;
+            }
+
+            // HTML Comum a todas as etiquetas
+            return `
+                <div class="etiqueta ${etiquetaClass}">
+                    <div class="cut-lines"></div>
+                    
+                    <div class="etiqueta-header">
+                        <div class="etiqueta-header-title">Unidade Produtora / Portadora</div>
+                        <div class="etiqueta-header-unit">
+                            <strong>${uCod}</strong> ${uNome.length > 30 ? uNome.substring(0,28)+'...' : uNome}
+                        </div>
+                    </div>
+
+                    <div class="etiqueta-body">
+                        <div class="etiqueta-row">
+                            <span class="etiqueta-label">Destinatário:</span>
+                            <span class="etiqueta-value">1344- SECRET. DE EDUCAÇÃO</span>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                             <div class="etiqueta-row" style="flex: 1;">
+                                <span class="etiqueta-label" style="min-width: 50px;">Código:</span>
+                                <span class="etiqueta-value"></span>
+                            </div>
+                            <div class="etiqueta-row">
+                                <span class="etiqueta-label" style="min-width: 35px;">Data:</span>
+                                <span class="etiqueta-value" style="letter-spacing: 1px;">__/__/____</span>
+                            </div>
+                        </div>
+                        
+                        <div class="etiqueta-row">
+                            <span class="etiqueta-label">Tipo Doc.:</span>
+                            <span class="etiqueta-value"></span>
+                        </div>
+                        
+                        <div style="flex: 1; display: flex; flex-direction: column;">
+                            <span class="etiqueta-label" style="margin-top: 4px;">Descrição:</span>
+                            <div class="descricao-box"></div>
+                        </div>
+                        
+                        <div class="etiqueta-row" style="border-bottom: none; padding-top: 8px;">
+                            <span class="etiqueta-label">Nº Documento:</span>
+                            <span class="etiqueta-value">S/N: _ _ _ _ _ _</span>
+                        </div>
+                    </div>
+                    
+                    ${bodyExtraHtml}
+                    ${footerHtml}
+                </div>
+            `;
+        }
+
+        // Inicialização
+        verificarEstadoBotao();
+    </script>
+</body>
+</html>
