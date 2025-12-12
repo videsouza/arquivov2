@@ -111,7 +111,7 @@
         .etiquetas-page {
             background: white;
             width: 196mm; 
-            height: 280mm; /* Altura segura para A4 */
+            height: 280mm; 
             margin: 0 auto 30px auto;
             display: grid;
             grid-template-columns: repeat(2, 98mm);
@@ -169,16 +169,15 @@
             font-size: 9.5pt; font-family: 'Inter', sans-serif; font-weight: 600; color: #111827; flex: 1;
         }
 
-        /* Descrição Flexível */
         .descricao-container {
             display: flex; flex-direction: column; flex-grow: 1; margin-top: 4px; 
-            min-height: 20px; /* Mínimo para não sumir */
+            min-height: 20px; 
         }
         .descricao-box {
             border: 1px dotted #9ca3af; width: 100%; flex-grow: 1; border-radius: 4px;
         }
 
-        /* GRID DE QUANTIDADE (Rodapé Interno) - Presente em todas agora */
+        /* GRID DO RODAPÉ (INTERNAL) */
         .meta-footer-grid {
             display: flex;
             border-top: 2px solid #1f2937;
@@ -187,7 +186,7 @@
         }
 
         .meta-col-qtd {
-            width: 35%;
+            width: 35%; /* Padrão, mas ajustável via style inline */
             border-right: 2px solid #1f2937;
             background: #f3f4f6;
             display: flex;
@@ -197,7 +196,7 @@
             padding: 2px;
         }
 
-        .meta-col-sep {
+        .meta-col-right {
             flex: 1;
             background: #f3f4f6;
             display: flex;
@@ -211,20 +210,29 @@
             font-size: 6pt; font-weight: 700; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;
         }
         
+        /* Ajuste solicitado: Remover linha abaixo de 'cm' */
         .meta-line {
             font-size: 10pt; font-weight: 600; color: #000;
-            border-bottom: 1px solid #000; width: 80%; text-align: center; height: 16px;
+            text-align: center; height: 16px;
+            /* Border removed here generally, applied specifically if needed */
         }
+        
+        .meta-line-border { border-bottom: 1px solid #000; width: 80%; }
+        .meta-line-noborder { border-bottom: none; width: 100%; }
 
-        /* Barra de Status (Preta/Branca) */
+        /* Barra de Status Inferior */
         .etiqueta-footer {
-            padding: 5px; text-align: center; border-top: none; /* Borda já está no grid acima */
+            padding: 5px; 
+            text-align: center; /* Garante centralização */
+            display: flex; justify-content: center; align-items: center; /* Flex para centralização robusta */
+            border-top: none; 
             font-weight: 800; font-size: 9pt; text-transform: uppercase;
             flex-shrink: 0;
+            min-height: 25px;
         }
 
         /* Cores de Status */
-        .status-eliminacao { background: #fff; color: #1f2937; border-top: 2px solid #1f2937; /* Eliminação precisa da borda pois fundo é branco */ }
+        .status-eliminacao { background: #fff; color: #1f2937; border-top: 2px solid #1f2937; }
         .status-permanente { background: #1f2937; color: white; }
         .status-amostragem { background: #1f2937; color: white; }
         
@@ -247,7 +255,7 @@
             
             .etiqueta-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
             .status-permanente, .status-amostragem { background: #000 !important; color: #fff !important; }
-            .meta-col-qtd, .meta-col-sep { background: #f3f4f6 !important; }
+            .meta-col-qtd, .meta-col-right { background: #f3f4f6 !important; }
             .descricao-box { border-color: #ccc !important; }
         }
     </style>
@@ -257,8 +265,8 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-title">
-                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas V.5</h1>
-                <p style="color:#6b7280; font-size:14px;">Escolha a Unidade Portadora e o tipo de etiqueta desejada.</p>
+                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas Pro</h1>
+                <p style="color:#6b7280; font-size:14px;">Ajustes Finalizados (Eliminação, Permanente e Amostragem)</p>
             </div>
         </header>
 
@@ -385,32 +393,69 @@
         function gerarTag() {
             if(!unidadeSelecionada) return '';
             const u = unidadeSelecionada;
-            let footerHtml = '', etiquetaClass = '';
-            let labelCol2 = "Responsável / Data"; // Padrão para Eliminação/Permanente
+            
+            let footerBarHtml = ''; 
+            let metaRightContent = '';
+            let etiquetaClass = '';
+            let widthQtd = '35%'; // Largura padrão da coluna Quantidade
 
-            // Configurações Específicas por Tipo
+            // Lógica de Variação por Tipo
             if(tipoSelecionado === 'eliminacao') {
-                footerHtml = `<div class="etiqueta-footer status-eliminacao">ELIMINAÇÃO: 31/12/_______</div>`;
+                // 1. ELIMINAÇÃO:
+                // Grid Dir: "ELIMINAÇÃO: 31/12/_______"
+                // Barra Status: "ELIMINAÇÃO"
+                metaRightContent = `
+                    <span class="meta-label">Data Limite</span>
+                    <div class="meta-line meta-line-noborder" style="font-size: 9pt;">ELIMINAÇÃO: 31/12/________</div>
+                `;
+                footerBarHtml = `<div class="etiqueta-footer status-eliminacao">ELIMINAÇÃO</div>`;
+                
             } else if(tipoSelecionado === 'permanente') {
-                footerHtml = `<div class="etiqueta-footer status-permanente">GUARDA PERMANENTE</div>`;
+                // 2. PERMANENTE:
+                // Grid Dir: Vazio ou Removido. Vamos fazer Qtd ocupar tudo ou deixar vazio.
+                // Pedido: "não precisa do campo RESPONSÁVEL / DATA".
+                // Solução: Coluna da direita vazia ou removida. Vou remover e alargar a qtd.
+                widthQtd = '100%'; // Quantidade ocupa toda a largura
+                metaRightContent = ''; // Sem segunda coluna
+                
+                footerBarHtml = `<div class="etiqueta-footer status-permanente">GUARDA PERMANENTE</div>`;
+                
             } else {
+                // 3. AMOSTRAGEM:
+                // Grid Dir: "Separado por Amostragem" + Data
+                // Barra Status: "GUARDA PERMANENTE (AMOSTRAGEM)" Centralizado
                 etiquetaClass = 'etiqueta-amostragem';
-                labelCol2 = "Separado por Amostragem"; // Específico para Amostragem
-                footerHtml = `<div class="status-amostragem">     GUARDA PERMANENTE (AMOSTRAGEM)</div>`;
+                metaRightContent = `
+                    <span class="meta-label">Separado por Amostragem</span>
+                    <div class="meta-line meta-line-border">___/___/____</div>
+                `;
+                footerBarHtml = `<div class="etiqueta-footer status-amostragem">GUARDA PERMANENTE (AMOSTRAGEM)</div>`;
             }
 
-            // Grid Comum de Quantidade e Data (Agora em TODOS)
-            const metaFooterHtml = `
-                <div class="meta-footer-grid">
-                    <div class="meta-col-qtd">
-                        <span class="meta-label">Quantidade</span>
-                        <div class="meta-line">_____ cm</div>
-                    </div>
-                    <div class="meta-col-sep">
-                        <span class="meta-label">${labelCol2}</span>
-                        <div class="meta-line">____/____/_____</div>
-                    </div>
-                </div>`;
+            // Construção da Grid do Rodapé Interno
+            // Se for Permanente, a col-right não é renderizada e a col-qtd tem 100% width
+            let metaFooterHtml = '';
+            
+            if(tipoSelecionado === 'permanente') {
+                metaFooterHtml = `
+                    <div class="meta-footer-grid">
+                        <div class="meta-col-qtd" style="width: 100%; border-right: none;">
+                            <span class="meta-label">Quantidade</span>
+                            <div class="meta-line meta-line-noborder">____ cm</div>
+                        </div>
+                    </div>`;
+            } else {
+                metaFooterHtml = `
+                    <div class="meta-footer-grid">
+                        <div class="meta-col-qtd">
+                            <span class="meta-label">Quantidade</span>
+                            <div class="meta-line meta-line-noborder">____ cm</div>
+                        </div>
+                        <div class="meta-col-right">
+                            ${metaRightContent}
+                        </div>
+                    </div>`;
+            }
 
             return `
                 <div class="etiqueta ${etiquetaClass}">
@@ -421,8 +466,8 @@
                     <div class="etiqueta-body">
                         
                         <div class="etiqueta-row">
-                            <span class="etiqueta-label">Destinatário: </span>
-                            <span class="etiqueta-value">1344 - SECRETARIA DE EDUCAÇÃO</span>
+                            <span class="etiqueta-label">Destinatário:</span>
+                            <span class="etiqueta-value"> 1344 - SECRETARIA DE EDUCAÇÃO</span>
                         </div>
 
                         <div style="display:flex; gap:10px; border-bottom:1px dotted #e5e7eb; padding:2px 0;">
@@ -432,7 +477,7 @@
                             </div>
                             <div style="display:flex; align-items:baseline;">
                                 <span class="etiqueta-label" style="min-width:35px;">Data:</span>
-                                <span class="etiqueta-value" style="min-width:80px;">__/__/____</span>
+                                <span class="etiqueta-value" style="min-width:80px;">_____/_____/_____</span>
                             </div>
                         </div>
 
@@ -443,7 +488,7 @@
                             </div>
                              <div style="display:flex; align-items:baseline;">
                                 <span class="etiqueta-label" style="min-width:45px;">Nº Doc:</span>
-                                <span class="etiqueta-value" style="min-width:80px;">______/____</span>
+                                <span class="etiqueta-value" style="min-width:80px;">____________</span>
                             </div>
                         </div>
 
@@ -455,7 +500,7 @@
                     </div>
                     
                     ${metaFooterHtml}
-                    ${footerHtml}
+                    ${footerBarHtml}
                 </div>
             `;
         }
