@@ -249,7 +249,7 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-title">
-                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas V.3</h1>
+                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas V.4</h1>
                 <p style="color:#6b7280; font-size:14px;">Layout Otimizado: 98x95mm (Max A4)</p>
             </div>
         </header>
@@ -258,7 +258,7 @@
             <div class="form-section">
                 <h2 class="section-title"><span class="step-num">1</span> Selecione a Unidade</h2>
                 <div class="search-container">
-                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder="Digite código ou nome..." autocomplete="off"></div>
+                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder=" Digite código ou nome..." autocomplete="off"></div>
                     <div class="search-results" id="searchResults"></div>
                 </div>
                 <div class="selected-unit-card" id="selectedUnit">
@@ -381,7 +381,7 @@
             
             // Lógica de Rodapé e Campos Extras
             if(tipoSelecionado === 'eliminacao') {
-                footerHtml = `<div class="etiqueta-footer status-eliminacao">QUANTIDADE: _____ cm | ELIMINAÇÃO: 31/12/_______</div>`;
+                footerHtml = `<div class="etiqueta-footer status-eliminacao">QUANTIDADE: _______ cm  |  ELIMINAÇÃO: 31/12/________</div>`;
             } else if(tipoSelecionado === 'permanente') {
                 footerHtml = `<div class="etiqueta-footer status-permanente">GUARDA PERMANENTE</div>`;
             } else {
@@ -427,7 +427,7 @@
                             </div>
                              <div style="display:flex; align-items:baseline;">
                                 <span class="etiqueta-label" style="min-width:45px;">Nº Doc: </span>
-                                <span class="etiqueta-value" style="min-width:80px;">__________</span>
+                                <span class="etiqueta-value" style="min-width:80px;">_____________</span>
                             </div>
                         </div>
 
