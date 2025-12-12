@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impressor de Etiquetas Pro | Hub de Serviços</title>
+    <title>Impressor de Etiquetas | Hub de Serviços</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -106,17 +106,15 @@
         .preview-section.show { display: block; }
         .preview-controls { margin-bottom: 30px; display: flex; gap: 15px; background: #f9fafb; padding: 20px; border-radius: 12px; }
 
-        /* --- ESTILOS DAS ETIQUETAS (CORRIGIDO PARA NÃO CORTAR) --- */
+        /* --- ESTILOS DAS ETIQUETAS (OTIMIZADO) --- */
         
         .etiquetas-page {
             background: white;
-            /* Largura mantida, Altura reduzida na visualização para simular a área segura */
             width: 196mm; 
-            height: 280mm; /* Reduzido de 285mm para segurança visual */
+            height: 280mm; /* Altura segura para A4 */
             margin: 0 auto 30px auto;
             display: grid;
             grid-template-columns: repeat(2, 98mm);
-            /* AJUSTE CRÍTICO: Reduzi a altura de 95mm para 93mm para evitar overflow na A4 */
             grid-template-rows: repeat(3, 93mm);    
             gap: 0;
             box-sizing: border-box;
@@ -130,13 +128,13 @@
             flex-direction: column;
             overflow: hidden;
             width: 98mm;  
-            height: 93mm; /* Altura ajustada */
+            height: 93mm; 
             position: relative;
             color: #000;
             padding: 0;
         }
 
-        /* Estrutura Interna */
+        /* Cabeçalho */
         .etiqueta-header {
             background-color: #f3f4f6; 
             padding: 6px 10px;
@@ -148,12 +146,13 @@
         .etiqueta-header-unit { font-size: 10pt; font-weight: 700; color: #111827; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .etiqueta-header-unit strong { font-size: 12pt; margin-right: 5px; font-weight: 800; }
 
+        /* Corpo */
         .etiqueta-body {
-            padding: 6px 12px; /* Padding levemente reduzido */
+            padding: 5px 12px;
             flex: 1;
             display: flex; 
             flex-direction: column; 
-            gap: 4px;
+            gap: 3px;
         }
 
         .etiqueta-row {
@@ -170,37 +169,24 @@
             font-size: 9.5pt; font-family: 'Inter', sans-serif; font-weight: 600; color: #111827; flex: 1;
         }
 
+        /* Descrição Flexível */
         .descricao-container {
-            display: flex; flex-direction: column; flex-grow: 1; margin-top: 4px; min-height: 25px;
+            display: flex; flex-direction: column; flex-grow: 1; margin-top: 4px; 
+            min-height: 20px; /* Mínimo para não sumir */
         }
         .descricao-box {
             border: 1px dotted #9ca3af; width: 100%; flex-grow: 1; border-radius: 4px;
         }
 
-        /* Rodapé Padrão */
-        .etiqueta-footer {
-            padding: 5px; text-align: center; border-top: 2px solid #374151;
-            font-weight: 800; font-size: 9pt; text-transform: uppercase;
-            flex-shrink: 0;
-        }
-
-        /* Cores de Status */
-        .status-eliminacao { background: #fff; color: #1f2937; }
-        .status-permanente { background: #1f2937; color: white; }
-        
-        /* NOVO LAYOUT: Amostragem (Grid no Footer) */
-        .etiqueta-amostragem .etiqueta-header { background-color: #e5e7eb; }
-        
-        /* Container que segura os dois campos */
-        .amostragem-footer-grid {
+        /* GRID DE QUANTIDADE (Rodapé Interno) - Presente em todas agora */
+        .meta-footer-grid {
             display: flex;
             border-top: 2px solid #1f2937;
-            height: 45px; /* Altura fixa para garantir espaço de escrita */
+            height: 42px;
             flex-shrink: 0;
         }
 
-        /* Coluna da Quantidade */
-        .amostragem-col-qtd {
+        .meta-col-qtd {
             width: 35%;
             border-right: 2px solid #1f2937;
             background: #f3f4f6;
@@ -211,8 +197,7 @@
             padding: 2px;
         }
 
-        /* Coluna da Data/Assinatura */
-        .amostragem-col-sep {
+        .meta-col-sep {
             flex: 1;
             background: #f3f4f6;
             display: flex;
@@ -222,27 +207,28 @@
             padding: 2px;
         }
 
-        .amostragem-label {
-            font-size: 6pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #4b5563;
-            margin-bottom: 2px;
+        .meta-label {
+            font-size: 6pt; font-weight: 700; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;
         }
         
-        .amostragem-line {
-            font-size: 10pt;
-            font-weight: 600;
-            color: #000;
-            border-bottom: 1px solid #000; /* Linha para escrever */
-            width: 80%;
-            text-align: center;
-            height: 18px;
+        .meta-line {
+            font-size: 10pt; font-weight: 600; color: #000;
+            border-bottom: 1px solid #000; width: 80%; text-align: center; height: 16px;
         }
 
-        .status-amostragem {
-            background: #1f2937; color: white; padding: 4px; font-size: 8pt; border-top: none; text-align: center;
+        /* Barra de Status (Preta/Branca) */
+        .etiqueta-footer {
+            padding: 5px; text-align: center; border-top: none; /* Borda já está no grid acima */
+            font-weight: 800; font-size: 9pt; text-transform: uppercase;
+            flex-shrink: 0;
         }
+
+        /* Cores de Status */
+        .status-eliminacao { background: #fff; color: #1f2937; border-top: 2px solid #1f2937; /* Eliminação precisa da borda pois fundo é branco */ }
+        .status-permanente { background: #1f2937; color: white; }
+        .status-amostragem { background: #1f2937; color: white; }
+        
+        .etiqueta-amostragem .etiqueta-header { background-color: #e5e7eb; }
 
         /* Impressão */
         @media print {
@@ -253,8 +239,6 @@
             
             @page {
                 size: A4;
-                /* Margens ajustadas para evitar o "empurrão" para baixo */
-                /* Top: 4mm é suficiente para a maioria das impressoras a laser/jato */
                 margin: 4mm 6mm; 
             }
             
@@ -263,7 +247,7 @@
             
             .etiqueta-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
             .status-permanente, .status-amostragem { background: #000 !important; color: #fff !important; }
-            .amostragem-col-qtd, .amostragem-col-sep { background: #f3f4f6 !important; }
+            .meta-col-qtd, .meta-col-sep { background: #f3f4f6 !important; }
             .descricao-box { border-color: #ccc !important; }
         }
     </style>
@@ -273,8 +257,8 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-title">
-                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas Pro</h1>
-                <p style="color:#6b7280; font-size:14px;">Layout Ajustado (Evita Corte na A4)</p>
+                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas V.5</h1>
+                <p style="color:#6b7280; font-size:14px;">Escolha a Unidade Portadora e o tipo de etiqueta desejada.</p>
             </div>
         </header>
 
@@ -282,7 +266,7 @@
             <div class="form-section">
                 <h2 class="section-title"><span class="step-num">1</span> Selecione a Unidade</h2>
                 <div class="search-container">
-                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder="Digite código ou nome..." autocomplete="off"></div>
+                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder=" Digite código ou nome..." autocomplete="off"></div>
                     <div class="search-results" id="searchResults"></div>
                 </div>
                 <div class="selected-unit-card" id="selectedUnit">
@@ -311,14 +295,14 @@
 
             <div class="btn-container">
                 <button class="btn btn-primary" id="btnGerar" onclick="gerarPreview()" disabled>
-                    <i class="fas fa-print"></i> Gerar Etiquetas Otimizadas
+                    <i class="fas fa-print"></i> Gerar Etiquetas
                 </button>
             </div>
         </div>
 
         <div class="preview-section" id="previewSection">
             <div class="preview-controls">
-                <label><strong>Quantidade:</strong></label>
+                <label><strong>Quantidade de Etiquetas:</strong></label>
                 <input type="number" id="numCopias" value="6" min="1" max="60" style="padding:5px; width:60px; text-align:center;">
                 <button class="btn btn-secondary" onclick="atualizarPreview()">Atualizar</button>
                 <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
@@ -339,7 +323,7 @@
         ];
 
         let unidadeSelecionada = null;
-        let tipoSelecionado = 'eliminacao'; // Default
+        let tipoSelecionado = 'eliminacao';
 
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
@@ -381,7 +365,7 @@
         function gerarPreview() { previewSection.classList.add('show'); atualizarPreview(); setTimeout(()=>previewSection.scrollIntoView({behavior:'smooth'}), 100); }
         function fecharPreview() { previewSection.classList.remove('show'); document.querySelector('.app-container').scrollIntoView({behavior:'smooth'}); }
 
-        // --- GERAÇÃO OTIMIZADA ---
+        // --- GERAÇÃO DE ETIQUETAS ---
         function atualizarPreview() {
             const num = parseInt(document.getElementById('numCopias').value) || 6;
             const container = document.getElementById('etiquetasContainer');
@@ -401,30 +385,32 @@
         function gerarTag() {
             if(!unidadeSelecionada) return '';
             const u = unidadeSelecionada;
-            let footerHtml = '', extraHtml = '', etiquetaClass = '';
-            
-            // Lógica de Rodapé e Campos Extras
+            let footerHtml = '', etiquetaClass = '';
+            let labelCol2 = "Responsável / Data"; // Padrão para Eliminação/Permanente
+
+            // Configurações Específicas por Tipo
             if(tipoSelecionado === 'eliminacao') {
-                footerHtml = `<div class="etiqueta-footer status-eliminacao">ELIMINAÇÃO: 31 / 12 / _ _ _ _</div>`;
+                footerHtml = `<div class="etiqueta-footer status-eliminacao">ELIMINAÇÃO: 31/12/_______</div>`;
             } else if(tipoSelecionado === 'permanente') {
                 footerHtml = `<div class="etiqueta-footer status-permanente">GUARDA PERMANENTE</div>`;
             } else {
-                // TIPO AMOSTRAGEM
                 etiquetaClass = 'etiqueta-amostragem';
-                // Criação do Grid de Rodapé (Quantidade e Separado Por)
-                extraHtml = `
-                    <div class="amostragem-footer-grid">
-                        <div class="amostragem-col-qtd">
-                            <span class="amostragem-label">Quantidade</span>
-                            <div class="amostragem-line">____ cm</div>
-                        </div>
-                        <div class="amostragem-col-sep">
-                            <span class="amostragem-label">Separado por Amostragem</span>
-                            <div class="amostragem-line">___/___/____</div>
-                        </div>
-                    </div>`;
+                labelCol2 = "Separado por Amostragem"; // Específico para Amostragem
                 footerHtml = `<div class="status-amostragem">GUARDA PERMANENTE (AMOSTRAGEM)</div>`;
             }
+
+            // Grid Comum de Quantidade e Data (Agora em TODOS)
+            const metaFooterHtml = `
+                <div class="meta-footer-grid">
+                    <div class="meta-col-qtd">
+                        <span class="meta-label">Quantidade</span>
+                        <div class="meta-line">_____ cm</div>
+                    </div>
+                    <div class="meta-col-sep">
+                        <span class="meta-label">${labelCol2}</span>
+                        <div class="meta-line">____/____/_____</div>
+                    </div>
+                </div>`;
 
             return `
                 <div class="etiqueta ${etiquetaClass}">
@@ -435,8 +421,8 @@
                     <div class="etiqueta-body">
                         
                         <div class="etiqueta-row">
-                            <span class="etiqueta-label">Destinatário:</span>
-                            <span class="etiqueta-value">1344 - SEC. MUNICIPAL DE EDUCAÇÃO</span>
+                            <span class="etiqueta-label">Destinatário: </span>
+                            <span class="etiqueta-value"> 1344 - SECRETARIA DE EDUCAÇÃO</span>
                         </div>
 
                         <div style="display:flex; gap:10px; border-bottom:1px dotted #e5e7eb; padding:2px 0;">
@@ -467,7 +453,8 @@
                         </div>
 
                     </div>
-                    ${extraHtml}
+                    
+                    ${metaFooterHtml}
                     ${footerHtml}
                 </div>
             `;
