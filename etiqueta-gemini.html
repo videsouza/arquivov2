@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impressor de Etiquetas | Hub de Serviços</title>
+    <title>Impressor de Etiquetas Pro | Hub de Serviços</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -106,68 +106,58 @@
         .preview-section.show { display: block; }
         .preview-controls { margin-bottom: 30px; display: flex; gap: 15px; background: #f9fafb; padding: 20px; border-radius: 12px; }
 
-        /* --- ESTILOS DAS ETIQUETAS (OTIMIZADO PARA A4) --- */
+        /* --- ESTILOS DAS ETIQUETAS (CORRIGIDO PARA NÃO CORTAR) --- */
         
-        /* DIMENSÕES OTIMIZADAS:
-           A4: 210mm x 297mm
-           Margem de impressão segura (geral): ~5mm
-           Largura útil: 200mm -> 2 etiquetas de 98mm (Total 196mm)
-           Altura útil: 287mm -> 3 etiquetas de 95mm (Total 285mm)
-        */
-
         .etiquetas-page {
             background: white;
-            /* Tamanho exato do conteúdo impresso */
+            /* Largura mantida, Altura reduzida na visualização para simular a área segura */
             width: 196mm; 
-            height: 285mm; 
+            height: 280mm; /* Reduzido de 285mm para segurança visual */
             margin: 0 auto 30px auto;
             display: grid;
-            grid-template-columns: repeat(2, 98mm); /* Mais largo */
-            grid-template-rows: repeat(3, 95mm);    /* Mais alto */
+            grid-template-columns: repeat(2, 98mm);
+            /* AJUSTE CRÍTICO: Reduzi a altura de 95mm para 93mm para evitar overflow na A4 */
+            grid-template-rows: repeat(3, 93mm);    
             gap: 0;
             box-sizing: border-box;
-            border: 1px solid #e5e7eb; /* Borda visualização tela */
+            border: 1px solid #e5e7eb;
         }
         
         .etiqueta {
-            border: 1px dashed #d1d5db; /* Linha de corte visualização */
+            border: 1px dashed #d1d5db;
             background: white;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            width: 98mm;  /* Aumentado */
-            height: 95mm; /* Aumentado */
+            width: 98mm;  
+            height: 93mm; /* Altura ajustada */
             position: relative;
             color: #000;
             padding: 0;
         }
 
-        /* Estrutura Interna Otimizada */
-        
-        /* Cabeçalho Compacto */
+        /* Estrutura Interna */
         .etiqueta-header {
             background-color: #f3f4f6; 
-            padding: 6px 10px; /* Padding reduzido */
+            padding: 6px 10px;
             border-bottom: 2px solid #374151;
             text-align: center;
-            flex-shrink: 0; /* Não encolhe */
+            flex-shrink: 0;
         }
         .etiqueta-header-title { font-size: 7pt; text-transform: uppercase; color: #4b5563; font-weight: 700; margin-bottom: 2px; }
         .etiqueta-header-unit { font-size: 10pt; font-weight: 700; color: #111827; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .etiqueta-header-unit strong { font-size: 12pt; margin-right: 5px; font-weight: 800; }
 
-        /* Corpo Flexível */
         .etiqueta-body {
-            padding: 8px 12px; 
-            flex: 1; /* Ocupa todo o espaço restante */
+            padding: 6px 12px; /* Padding levemente reduzido */
+            flex: 1;
             display: flex; 
             flex-direction: column; 
-            gap: 4px; /* Gap pequeno */
+            gap: 4px;
         }
 
-        /* Linhas de Dados Compactas */
         .etiqueta-row {
-            display: flex; align-items: baseline; padding: 2px 0; /* Padding reduzido */
+            display: flex; align-items: baseline; padding: 2px 0;
             border-bottom: 1px dotted #e5e7eb;
             font-size: 9pt;
         }
@@ -180,40 +170,79 @@
             font-size: 9.5pt; font-family: 'Inter', sans-serif; font-weight: 600; color: #111827; flex: 1;
         }
 
-        /* Área de Descrição Expandida */
         .descricao-container {
-            display: flex; 
-            flex-direction: column; 
-            flex-grow: 1; /* A MÁGICA: Cresce para ocupar o espaço vertical livre */
-            margin-top: 4px;
-            min-height: 30px; /* Altura mínima garantida */
+            display: flex; flex-direction: column; flex-grow: 1; margin-top: 4px; min-height: 25px;
         }
-        
         .descricao-box {
-            border: 1px dotted #9ca3af;
-            width: 100%;
-            flex-grow: 1; /* Caixa cresce dentro do container */
-            border-radius: 4px;
+            border: 1px dotted #9ca3af; width: 100%; flex-grow: 1; border-radius: 4px;
         }
 
-        /* Footer */
+        /* Rodapé Padrão */
         .etiqueta-footer {
-            padding: 6px; text-align: center; border-top: 2px solid #374151;
+            padding: 5px; text-align: center; border-top: 2px solid #374151;
             font-weight: 800; font-size: 9pt; text-transform: uppercase;
             flex-shrink: 0;
         }
 
-        /* Estilos de Status */
+        /* Cores de Status */
         .status-eliminacao { background: #fff; color: #1f2937; }
         .status-permanente { background: #1f2937; color: white; }
         
-        /* Amostragem Layout */
+        /* NOVO LAYOUT: Amostragem (Grid no Footer) */
         .etiqueta-amostragem .etiqueta-header { background-color: #e5e7eb; }
-        .amostragem-footer-container { display: flex; border-top: 2px solid #1f2937; flex-shrink: 0; }
-        .amostragem-qtd { width: 35%; border-right: 2px solid #1f2937; padding: 4px; text-align: center; background: #f3f4f6; }
-        .amostragem-sep { flex: 1; padding: 4px; text-align: center; background: #f3f4f6; }
-        .amostragem-label { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; display: block; }
-        .status-amostragem { background: #1f2937; color: white; padding: 5px; font-size: 8pt; border-top: none; }
+        
+        /* Container que segura os dois campos */
+        .amostragem-footer-grid {
+            display: flex;
+            border-top: 2px solid #1f2937;
+            height: 45px; /* Altura fixa para garantir espaço de escrita */
+            flex-shrink: 0;
+        }
+
+        /* Coluna da Quantidade */
+        .amostragem-col-qtd {
+            width: 35%;
+            border-right: 2px solid #1f2937;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2px;
+        }
+
+        /* Coluna da Data/Assinatura */
+        .amostragem-col-sep {
+            flex: 1;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2px;
+        }
+
+        .amostragem-label {
+            font-size: 6pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #4b5563;
+            margin-bottom: 2px;
+        }
+        
+        .amostragem-line {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #000;
+            border-bottom: 1px solid #000; /* Linha para escrever */
+            width: 80%;
+            text-align: center;
+            height: 18px;
+        }
+
+        .status-amostragem {
+            background: #1f2937; color: white; padding: 4px; font-size: 8pt; border-top: none; text-align: center;
+        }
 
         /* Impressão */
         @media print {
@@ -224,22 +253,17 @@
             
             @page {
                 size: A4;
-                /* Margens Críticas: 5mm vertical e 7mm horizontal para centralizar */
-                margin: 5mm 7mm; 
+                /* Margens ajustadas para evitar o "empurrão" para baixo */
+                /* Top: 4mm é suficiente para a maioria das impressoras a laser/jato */
+                margin: 4mm 6mm; 
             }
             
-            .etiquetas-page {
-                margin: 0; border: none; page-break-after: always;
-            }
-
-            .etiqueta {
-                border: 0.5pt solid #000; /* Linha de corte fina para impressão */
-            }
-
-            /* Forçar cores para impressão */
+            .etiquetas-page { margin: 0; border: none; page-break-after: always; height: auto; }
+            .etiqueta { border: 0.5pt solid #000; }
+            
             .etiqueta-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
             .status-permanente, .status-amostragem { background: #000 !important; color: #fff !important; }
-            .amostragem-qtd, .amostragem-sep { background: #f3f4f6 !important; }
+            .amostragem-col-qtd, .amostragem-col-sep { background: #f3f4f6 !important; }
             .descricao-box { border-color: #ccc !important; }
         }
     </style>
@@ -249,8 +273,8 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-title">
-                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas V.4</h1>
-                <p style="color:#6b7280; font-size:14px;">Layout Otimizado: 98x95mm (Max A4)</p>
+                <h1><i class="fas fa-tags"></i> Impressor de Etiquetas Pro</h1>
+                <p style="color:#6b7280; font-size:14px;">Layout Ajustado (Evita Corte na A4)</p>
             </div>
         </header>
 
@@ -258,7 +282,7 @@
             <div class="form-section">
                 <h2 class="section-title"><span class="step-num">1</span> Selecione a Unidade</h2>
                 <div class="search-container">
-                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder=" Digite código ou nome..." autocomplete="off"></div>
+                    <div class="input-group"><i class="fas fa-search"></i><input type="text" id="searchInput" class="search-input" placeholder="Digite código ou nome..." autocomplete="off"></div>
                     <div class="search-results" id="searchResults"></div>
                 </div>
                 <div class="selected-unit-card" id="selectedUnit">
@@ -305,7 +329,7 @@
     </div>
 
     <script>
-        // --- DADOS E LÓGICA (Mantidos da versão anterior) ---
+        // --- DADOS E LÓGICA ---
         const unidades = [
             { codigo: "1", nome: "GABINETE DO PREFEITO" },
             { codigo: "2", nome: "SECRETARIA MUNICIPAL DE GOVERNO" },
@@ -315,7 +339,7 @@
         ];
 
         let unidadeSelecionada = null;
-        let tipoSelecionado = 'eliminacao';
+        let tipoSelecionado = 'eliminacao'; // Default
 
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
@@ -368,7 +392,7 @@
                 html += '<div class="etiquetas-page">';
                 const qtd = Math.min(porPag, num - (p*porPag));
                 for(let i=0; i<qtd; i++) html += gerarTag();
-                for(let i=qtd; i<porPag; i++) html += '<div style="visibility:hidden; width:98mm; height:95mm"></div>';
+                for(let i=qtd; i<porPag; i++) html += '<div style="visibility:hidden; width:98mm; height:93mm"></div>';
                 html += '</div>';
             }
             container.innerHTML = html;
@@ -381,21 +405,27 @@
             
             // Lógica de Rodapé e Campos Extras
             if(tipoSelecionado === 'eliminacao') {
-                footerHtml = `<div class="etiqueta-footer status-eliminacao">QUANTIDADE: _______ cm  |  ELIMINAÇÃO: 31/12/________</div>`;
+                footerHtml = `<div class="etiqueta-footer status-eliminacao">ELIMINAÇÃO: 31 / 12 / _ _ _ _</div>`;
             } else if(tipoSelecionado === 'permanente') {
                 footerHtml = `<div class="etiqueta-footer status-permanente">GUARDA PERMANENTE</div>`;
             } else {
+                // TIPO AMOSTRAGEM
                 etiquetaClass = 'etiqueta-amostragem';
+                // Criação do Grid de Rodapé (Quantidade e Separado Por)
                 extraHtml = `
-                    <div class="amostragem-footer-container">
-                        <div class="amostragem-qtd"><span class="amostragem-label">Quantidade</span><span style="font-weight:600">___ cm</span></div>
-                        <div class="amostragem-sep"><span class="amostragem-label">Amostragem</span><span style="font-weight:600">__/__/____</span></div>
+                    <div class="amostragem-footer-grid">
+                        <div class="amostragem-col-qtd">
+                            <span class="amostragem-label">Quantidade</span>
+                            <div class="amostragem-line">____ cm</div>
+                        </div>
+                        <div class="amostragem-col-sep">
+                            <span class="amostragem-label">Separado por Amostragem</span>
+                            <div class="amostragem-line">___/___/____</div>
+                        </div>
                     </div>`;
-                footerHtml = `<div class="etiqueta-footer status-amostragem">PERMANENTE (AMOSTRAGEM)</div>`;
+                footerHtml = `<div class="status-amostragem">GUARDA PERMANENTE (AMOSTRAGEM)</div>`;
             }
 
-            // HTML Estruturado para Maximização de Espaço
-            // Note o uso de "flex-grow" na descricao-container
             return `
                 <div class="etiqueta ${etiquetaClass}">
                     <div class="etiqueta-header">
@@ -405,8 +435,8 @@
                     <div class="etiqueta-body">
                         
                         <div class="etiqueta-row">
-                            <span class="etiqueta-label">Destinatário: </span>
-                            <span class="etiqueta-value"> 1344 - SECRETARIA DE EDUCAÇÃO</span>
+                            <span class="etiqueta-label">Destinatário:</span>
+                            <span class="etiqueta-value">1344 - SEC. MUNICIPAL DE EDUCAÇÃO</span>
                         </div>
 
                         <div style="display:flex; gap:10px; border-bottom:1px dotted #e5e7eb; padding:2px 0;">
@@ -415,8 +445,8 @@
                                 <span class="etiqueta-value"></span>
                             </div>
                             <div style="display:flex; align-items:baseline;">
-                                <span class="etiqueta-label" style="min-width:35px;">Data: </span>
-                                <span class="etiqueta-value" style="min-width:80px;">30/12/_______</span>
+                                <span class="etiqueta-label" style="min-width:35px;">Data:</span>
+                                <span class="etiqueta-value" style="min-width:80px;">__/__/____</span>
                             </div>
                         </div>
 
@@ -426,8 +456,8 @@
                                 <span class="etiqueta-value"></span>
                             </div>
                              <div style="display:flex; align-items:baseline;">
-                                <span class="etiqueta-label" style="min-width:45px;">Nº Doc: </span>
-                                <span class="etiqueta-value" style="min-width:80px;">_____________</span>
+                                <span class="etiqueta-label" style="min-width:45px;">Nº Doc:</span>
+                                <span class="etiqueta-value" style="min-width:80px;">______/____</span>
                             </div>
                         </div>
 
