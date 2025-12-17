@@ -92,7 +92,7 @@
         .obj-icon { font-size: 24px; }
 
         /* Inputs Grid */
-        .params-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: end; }
+        .params-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: end; }
         .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; }
         .input-control {
             width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
@@ -163,7 +163,7 @@
     <div class="loading" id="loading">
         <div class="spinner"></div>
         <h3 style="color:var(--text-main)">Processando Otimização...</h3>
-        <p style="color:var(--text-sub)">Aplicando restrições de complexidade e validando totais.</p>
+        <p style="color:var(--text-sub)">Validando totais e criando blocos inteligentes.</p>
     </div>
 
     <div class="container">
@@ -214,16 +214,12 @@
                         <div class="obj-icon">📦</div>
                         <div>
                             <div style="font-weight:700;">Distribuir Boxes</div>
-                            <div style="font-size:12px; color:var(--text-sub);">Prioriza agrupar caixas menores.</div>
+                            <div style="font-size:12px; color:var(--text-sub);">Prioriza caixas menores primeiro.</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="params-grid">
-                    <div class="input-group">
-                        <label>Máximo Boxes / Bloco</label>
-                        <input type="number" id="maxBoxes" class="input-control" value="20">
-                    </div>
                     <div class="input-group">
                         <label title="Máximo de códigos de assunto diferentes num mesmo bloco">Max Códigos / Bloco</label>
                         <input type="number" id="maxCodes" class="input-control" value="30">
@@ -233,7 +229,7 @@
                         <input type="number" id="maxSectors" class="input-control" value="12">
                     </div>
                     <div class="input-group">
-                        <button class="btn btn-primary" onclick="iniciarOtimizacao()">🚀 Processar</button>
+                        <button class="btn btn-primary" onclick="iniciarOtimizacao()">🚀 Processar Blocos</button>
                     </div>
                 </div>
             </div>
@@ -247,7 +243,7 @@
                 <div class="score-panel">
                     <div>
                         <div class="score-label">Índice de Qualidade da Otimização</div>
-                        <div class="score-desc" id="scoreText">Excelente</div>
+                        <div class="score-desc" id="scoreText">Analisando...</div>
                     </div>
                     <div class="score-val"><span id="scoreVal">0</span>%</div>
                 </div>
@@ -343,7 +339,7 @@
 
                     // 3. OTIMIZAÇÃO (Bin Packing com Restrições)
                     const configs = {
-                        maxBoxes: parseInt(document.getElementById('maxBoxes').value) || 20,
+                        // REMOVIDO maxBoxes
                         maxCodes: parseInt(document.getElementById('maxCodes').value) || 30,
                         maxSectors: parseInt(document.getElementById('maxSectors').value) || 12,
                         objetivo: state.objective
@@ -370,14 +366,8 @@
 
         // --- HELPERS DE EXTRAÇÃO ---
         function extrairDadosCompletos(rows) {
-            // Extrai Qtd, mas também lista de Códigos e Setores para validar complexidade
             const map = {};
-            // Colunas (Baseado no seu CSV): BOX=K(10), SETOR=D(3), COD=P(15) - Aprox
-            // O seu CSV anterior mostrava: Setor Port.: (coluna 3 aprox), Box: (coluna 9/10), Cod.TT: (coluna 15)
-            // Vou usar busca dinâmica de header para garantir ou fixo se padrão. 
-            // Pelo seu HTML anterior, você usava JSON direto. Aqui vou usar índices fixos baseados na sua correção anterior.
-            // Box=10, vamos assumir Setor=3 e Cod=15 (padrão desse relatório).
-            
+            // BOX=K(10), SETOR=D(3), COD=P(15) (Ajustável conforme CSV)
             for(let i=1; i < rows.length; i++) {
                 const row = rows[i];
                 if(row && row[10] !== undefined) {
@@ -416,7 +406,7 @@
             return map;
         }
 
-        // --- ALGORITMO INTELIGENTE ---
+        // --- ALGORITMO INTELIGENTE (SEM LIMITE DE BOXES) ---
         function rodarAlgoritmo(boxes, cfg) {
             // Ordenação
             if(cfg.objetivo === 'documentos') boxes.sort((a,b) => b.qtd - a.qtd);
@@ -424,20 +414,20 @@
 
             const blocos = [];
 
-            // Best-Fit modificado com restrições
+            // Best-Fit modificado com restrições de complexidade APENAS
             for(const box of boxes) {
                 let melhorBloco = null;
                 
                 // Tenta encaixar em blocos existentes
                 for(const bloco of blocos) {
-                    // 1. Checa Capacidade Básica
-                    if(bloco.items.length >= cfg.maxBoxes) continue;
+                    
+                    // REMOVIDO: Checa Capacidade Básica (maxBoxes)
 
-                    // 2. Checa Restrição de Códigos Únicos
+                    // 1. Checa Restrição de Códigos Únicos
                     const codigosUniao = new Set([...bloco.codigos, ...box.codigos]);
                     if(codigosUniao.size > cfg.maxCodes) continue;
 
-                    // 3. Checa Restrição de Setores por Código
+                    // 2. Checa Restrição de Setores por Código
                     let setorEstourou = false;
                     for(const cod of box.codigos) {
                         const setoresAtuais = bloco.setoresPorCod[cod] || new Set();
@@ -450,9 +440,9 @@
                     }
                     if(setorEstourou) continue;
 
-                    // Se passou, é candidato.
+                    // Se passou das restrições de complexidade, é candidato.
                     melhorBloco = bloco;
-                    break; // First Fit strategy para velocidade, ou remova para Best Fit real
+                    break; 
                 }
 
                 if(melhorBloco) {
@@ -486,13 +476,14 @@
         function renderizarResultados(totalInput, validos, rejeitados, blocos, objetivo) {
             const totalDocs = validos.reduce((a,b) => a + b.qtd, 0);
             
-            // Cálculo do Score (Sua lógica)
-            const percDocs = validos.length > 0 ? (totalDocs / totalDocs) * 100 : 0; // Simplificado pois validos ja sao o universo otimizavel
-            // Score de "Compactação": Média de ocupação dos blocos
-            const ocupacaoMedia = blocos.reduce((acc, b) => acc + (b.items.length / 20), 0) / blocos.length; 
-            const score = Math.min(100, Math.round(ocupacaoMedia * 100));
+            // Cálculo do Score (Adaptado)
+            // Como não temos mais limite de boxes, blocos gigantes são bons (alta eficiência de manuseio)
+            // Score = % dos docs otimizados vs total possível (aqui é 100% dos validos)
+            // Vamos usar Densidade Média como métrica de qualidade visual
+            const densidade = blocos.length > 0 ? Math.round(validos.length / blocos.length) : 0;
+            const score = Math.min(100, densidade * 2); // Heurística visual apenas
             
-            let scoreMsg = score > 80 ? "Excelente Eficiência" : score > 50 ? "Boa Distribuição" : "Baixa Otimização";
+            let scoreMsg = "Otimização Concluída";
             document.getElementById('scoreVal').innerText = score;
             document.getElementById('scoreText').innerText = scoreMsg;
 
@@ -503,7 +494,7 @@
                     <div class="stat-val">${totalInput}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-lbl">Boxes Válidos</div>
+                    <div class="stat-lbl">Boxes Aprovados</div>
                     <div class="stat-val" style="color:var(--success)">${validos.length}</div>
                 </div>
                 <div class="stat-card">
