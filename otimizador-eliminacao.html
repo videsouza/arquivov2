@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação Pro | Hub de Serviços</title>
+    <title>Otimizador de Eliminação | Hub de Serviços</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- VARIÁVEIS E CORES (Identidade Visual Nova) --- */
+        /* --- VARIÁVEIS E DESIGN SYSTEM --- */
         :root {
-            --primary: #f7931e;        /* Laranja Principal */
+            --primary: #f7931e;
             --primary-light: #fff7ed;
             --primary-dark: #d67d12;
             --text-main: #1f2937;
@@ -22,9 +22,7 @@
             --border: #e5e7eb;
             --success: #10b981;
             --danger: #ef4444;
-            --info: #3b82f6;
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
@@ -34,504 +32,462 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             padding: 20px;
-            min-height: 100vh;
             line-height: 1.5;
         }
 
-        .app-container {
+        .container {
             max-width: 1400px;
             margin: 0 auto;
             background: var(--bg-card);
             border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
             overflow: hidden;
             display: flex; flex-direction: column;
+            min-height: 90vh;
         }
 
-        /* --- HEADER --- */
-        .app-header {
-            padding: 25px 40px; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; background: #fff;
+        /* HEADER */
+        .header {
+            background: #fff;
+            padding: 30px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .header-title h1 { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
-        .header-title h1 i { color: var(--primary); margin-right: 10px; }
-        .header-desc { font-size: 14px; color: var(--text-sub); margin-top: 4px; }
+        .header h1 { font-size: 24px; font-weight: 800; color: var(--text-main); }
+        .header h1 i { color: var(--primary); margin-right: 10px; }
+        .header p { color: var(--text-sub); font-size: 14px; margin-top: 5px; }
 
-        .app-content { padding: 40px; }
+        .content { padding: 40px; }
 
-        /* --- UPLOAD SECTION (DUPLO) --- */
-        .upload-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        /* UPLOAD GRID */
+        .upload-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;
+        }
+
+        .upload-area {
+            background: #f9fafb;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-area:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+        .upload-area.loaded { border-color: var(--success); background: #ecfdf5; }
         
-        .upload-card {
-            border: 2px dashed var(--border); border-radius: 12px;
-            padding: 30px; text-align: center; background: #f9fafb;
-            cursor: pointer; transition: all 0.2s; position: relative;
-        }
-        .upload-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
-        .upload-card.loaded { border-color: var(--success); background: #ecfdf5; }
-        
-        .upload-icon { font-size: 32px; color: var(--text-sub); margin-bottom: 15px; transition: color 0.3s; }
-        .upload-card:hover .upload-icon { color: var(--primary); }
-        .upload-card.loaded .upload-icon { color: var(--success); }
+        .upload-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; opacity: 0.8; }
+        .upload-area.loaded .upload-icon { color: var(--success); }
         
         .step-badge {
-            position: absolute; top: -12px; left: 20px; background: var(--text-main); color: white;
-            padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: absolute; top: -12px; left: 20px;
+            background: var(--text-main); color: white;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
         }
 
-        /* --- CONFIGURAÇÃO (Restaurada do V2) --- */
-        .config-panel {
-            background: white; border: 1px solid var(--border); border-radius: 12px; padding: 30px;
-            margin-bottom: 40px; box-shadow: var(--shadow-md);
+        /* CONFIGURAÇÕES */
+        .config-section {
+            background: white; border: 1px solid var(--border);
+            border-radius: 12px; padding: 30px; margin-bottom: 30px;
+            display: none; animation: fadeIn 0.5s ease;
         }
-        
-        .config-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        
-        /* Cards de Objetivo */
+        .config-section.show { display: block; }
+
+        .config-title {
+            font-size: 18px; font-weight: 700; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* Objetivo Cards (Estilo do seu HTML original adaptado) */
         .objective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         
         .obj-card {
             border: 2px solid var(--border); border-radius: 10px; padding: 20px;
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 15px;
+            cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.2s;
         }
-        .obj-card:hover { border-color: var(--primary); background: var(--primary-light); }
-        .obj-card.active { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 0 2px rgba(247, 147, 30, 0.2); }
-        
-        .obj-icon { font-size: 24px; color: var(--text-sub); }
-        .obj-card.active .obj-icon { color: var(--primary); }
-        
-        /* Inputs de Restrição */
-        .constraints-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: end; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
-        .form-control {
+        .obj-card:hover { border-color: var(--primary); }
+        .obj-card.active {
+            border-color: var(--primary); background: var(--primary-light);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        .obj-icon { font-size: 24px; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
+        .input-control {
             width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-            font-size: 15px; font-family: 'Inter', sans-serif; transition: border 0.2s;
+            font-size: 15px; font-family: 'Inter', sans-serif;
         }
-        .form-control:focus { border-color: var(--primary); }
 
-        /* --- BOTÃO DE AÇÃO --- */
+        /* BOTÕES */
         .btn {
-            padding: 14px 28px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; transition: all 0.2s;
+            padding: 14px 28px; border: none; border-radius: 8px; font-weight: 600;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            font-size: 16px; transition: all 0.2s;
         }
-        .btn-primary { background: var(--primary); color: white; width: 100%; height: 48px; }
-        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
-        .btn-primary:disabled { background: #d1d5db; cursor: not-allowed; }
-        .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); font-size: 14px; padding: 10px 20px; }
-        .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background: #f9fafb; }
 
-        /* --- RESULTADOS --- */
-        .results-section { display: none; animation: fadeIn 0.5s ease; }
-        
-        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .kpi-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); }
-        .kpi-val { font-size: 28px; font-weight: 800; color: var(--text-main); line-height: 1.2; }
-        .kpi-lbl { font-size: 12px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; margin-top: 5px; }
+        /* RESULTADOS */
+        .results-section { display: none; animation: slideUp 0.5s ease; }
+        .results-section.show { display: block; }
 
-        /* Blocos */
-        .blocks-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-        
-        .block-unit {
-            background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-            transition: all 0.2s; display: flex; flex-direction: column;
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;
         }
-        .block-unit:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        
-        .block-head {
-            background: #f8fafc; padding: 15px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
+        .stat-card {
+            background: white; border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; text-align: center;
         }
-        .block-title { font-weight: 700; color: var(--text-main); font-size: 15px; }
-        .block-badge { background: var(--primary-light); color: var(--primary-dark); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-        
-        .block-content { padding: 20px; flex: 1; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-sub); }
-        .stat-val { font-weight: 600; color: var(--text-main); }
-        
+        .stat-val { font-size: 32px; font-weight: 800; color: var(--text-main); margin: 10px 0; }
+        .stat-lbl { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; }
+
+        .blocks-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        }
+        .block-card {
+            background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+            transition: all 0.2s;
+        }
+        .block-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow); }
+        .block-header {
+            background: #f9fafb; padding: 12px 15px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; font-weight: 700; color: var(--text-main);
+        }
+        .block-body { padding: 15px; font-size: 13px; color: var(--text-sub); }
         .box-list {
-            margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border);
-            font-family: monospace; font-size: 12px; color: var(--text-sub); line-height: 1.6;
-            max-height: 100px; overflow-y: auto;
+            margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+            font-family: monospace; line-height: 1.4; max-height: 80px; overflow-y: auto;
         }
 
-        /* Log de Erros */
+        /* LOADING */
+        .loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 100;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%;
+            width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+
+        /* Erros */
         .error-log {
-            margin-top: 40px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 12px; padding: 25px;
-            display: none;
+            margin-top: 30px; padding: 20px; background: #fff1f2; border: 1px solid #fecaca;
+            border-radius: 10px; color: #991b1b; display: none; font-size: 13px;
         }
-        .error-log h4 { color: #991b1b; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .error-list { max-height: 200px; overflow-y: auto; padding-left: 20px; font-size: 13px; color: #7f1d1d; }
-        .error-list li { margin-bottom: 5px; }
 
-        /* Loading */
-        .loading-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95);
-            display:none; flex-direction:column; justify-content:center; align-items:center; z-index: 50;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <header class="app-header">
-            <div class="header-title">
-                <h1><i class="fas fa-cubes"></i> Otimizador de Eliminação Pro</h1>
-                <p class="header-desc">Cross-Check e Agrupamento Inteligente de Boxes</p>
-            </div>
-            <button class="btn-secondary" onclick="location.reload()" title="Reiniciar"><i class="fas fa-undo"></i></button>
-        </header>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <h3 style="color:var(--text-main)">Processando Inteligência...</h3>
+        <p style="color:var(--text-sub)">Validando totais e aplicando algoritmo de otimização.</p>
+    </div>
 
-        <div class="app-content" style="position: relative;">
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-cubes"></i> Otimizador de Eliminação</h1>
+                <p>Cross-Check de segurança e geração de blocos inteligentes</p>
+            </div>
+            <button class="btn-secondary" onclick="location.reload()" style="padding: 8px 16px; border-radius: 6px;">
+                <i class="fas fa-undo"></i> Reiniciar
+            </button>
+        </div>
+
+        <div class="content">
             
-            <div class="loading-overlay" id="loading">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
-                <h3 style="color: var(--text-main);">Processando Algoritmo...</h3>
-                <p style="color: var(--text-sub);">Validando totais e gerando blocos otimizados.</p>
+            <div class="upload-grid" id="uploadSection">
+                <div class="upload-area" id="dropElim" onclick="document.getElementById('fileElim').click()">
+                    <span class="step-badge">Passo 1</span>
+                    <input type="file" id="fileElim" accept=".xlsx,.xls,.csv" hidden>
+                    <i class="fas fa-file-alt upload-icon" id="iconElim"></i>
+                    <h3 style="font-size:16px; font-weight:700; margin-bottom:5px;">Relatório de Elimináveis</h3>
+                    <p style="font-size:13px; color:var(--text-sub)">Contém docs a eliminar (Box na Col K)</p>
+                    <div id="nameElim" style="margin-top:10px; font-weight:600; color:var(--primary); font-size:12px;"></div>
+                </div>
+
+                <div class="upload-area" id="dropTot" onclick="document.getElementById('fileTot').click()">
+                    <span class="step-badge">Passo 2</span>
+                    <input type="file" id="fileTot" accept=".xlsx,.xls,.csv" hidden>
+                    <i class="fas fa-chart-pie upload-icon" id="iconTot"></i>
+                    <h3 style="font-size:16px; font-weight:700; margin-bottom:5px;">Totais por Box</h3>
+                    <p style="font-size:13px; color:var(--text-sub)">Validação (Box na Col A, Total na Col I)</p>
+                    <div id="nameTot" style="margin-top:10px; font-weight:600; color:var(--primary); font-size:12px;"></div>
+                </div>
             </div>
 
-            <div id="setupView">
+            <div class="config-section" id="configSection">
+                <h3 class="config-title"><i class="fas fa-sliders-h"></i> Parâmetros de Otimização</h3>
                 
-                <div class="upload-section">
-                    <div class="upload-card" id="dropEliminaveis" onclick="document.getElementById('fileEliminaveis').click()">
-                        <span class="step-badge">Passo 1</span>
-                        <input type="file" id="fileEliminaveis" accept=".xlsx, .xls, .csv" hidden>
-                        <i class="fas fa-file-alt upload-icon" id="iconEliminaveis"></i>
-                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Relatório de Elimináveis</h3>
-                        <p style="font-size: 13px; color: var(--text-sub);">Contém os documentos a eliminar (Box na Col K)</p>
-                        <div id="nameEliminaveis" style="margin-top:10px; font-weight:600; color:var(--primary); font-size:12px;"></div>
+                <div class="objective-grid">
+                    <div class="obj-card active" id="objDocs" onclick="selecionarObjetivo('documentos')">
+                        <div class="obj-icon">📄</div>
+                        <div>
+                            <div style="font-weight:700;">Maximizar Documentos</div>
+                            <div style="font-size:12px; color:var(--text-sub);">Prioriza boxes mais cheios (Esvazia arquivo)</div>
+                        </div>
                     </div>
-
-                    <div class="upload-card" id="dropTotais" onclick="document.getElementById('fileTotais').click()">
-                        <span class="step-badge">Passo 2</span>
-                        <input type="file" id="fileTotais" accept=".xlsx, .xls, .csv" hidden>
-                        <i class="fas fa-chart-pie upload-icon" id="iconTotais"></i>
-                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Totais por Box</h3>
-                        <p style="font-size: 13px; color: var(--text-sub);">Validação de integridade (Box na Col A, Total na Col I)</p>
-                        <div id="nameTotais" style="margin-top:10px; font-weight:600; color:var(--primary); font-size:12px;"></div>
+                    <div class="obj-card" id="objBoxes" onclick="selecionarObjetivo('boxes')">
+                        <div class="obj-icon">📦</div>
+                        <div>
+                            <div style="font-weight:700;">Distribuir Boxes</div>
+                            <div style="font-size:12px; color:var(--text-sub);">Equilibra a quantidade de caixas</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="config-panel">
-                    <h3 class="config-title"><i class="fas fa-sliders-h"></i> Parâmetros de Otimização</h3>
-                    
-                    <label style="font-size:13px; font-weight:600; color:var(--text-sub); margin-bottom:10px; display:block;">Objetivo do Agrupamento:</label>
-                    <div class="objective-grid">
-                        <div class="obj-card active" id="objDocs" onclick="setObjective('docs')">
-                            <i class="fas fa-file-alt obj-icon"></i>
-                            <div>
-                                <div style="font-weight:700;">Maximizar Documentos</div>
-                                <div style="font-size:12px; color:var(--text-sub);">Prioriza boxes mais cheios nos primeiros blocos.</div>
-                            </div>
-                        </div>
-                        <div class="obj-card" id="objBoxes" onclick="setObjective('boxes')">
-                            <i class="fas fa-box obj-icon"></i>
-                            <div>
-                                <div style="font-weight:700;">Distribuir Boxes</div>
-                                <div style="font-size:12px; color:var(--text-sub);">Tenta equilibrar a quantidade de boxes.</div>
-                            </div>
-                        </div>
+                <div style="display: flex; gap: 20px; align-items: flex-end;">
+                    <div class="input-group" style="flex:1">
+                        <label class="input-label">Máximo de Boxes por Bloco</label>
+                        <input type="number" id="maxBoxes" class="input-control" value="20">
                     </div>
-
-                    <div class="constraints-grid">
-                        <div class="form-group">
-                            <label>Máximo de Boxes por Bloco</label>
-                            <input type="number" id="maxBoxes" class="form-control" value="20">
-                        </div>
-                        <div class="form-group">
-                            <label>Máximo de Docs por Bloco</label>
-                            <input type="number" id="maxDocs" class="form-control" value="2000" placeholder="Opcional">
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-primary" id="btnProcessar" onclick="executarOtimizacao()" disabled>
-                                Processar e Gerar Blocos <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
+                    <div class="input-group" style="flex:1">
+                        <button class="btn btn-primary" onclick="iniciarOtimizacao()">
+                            🚀 Processar Blocos
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div id="resultsView" class="results-section">
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <div class="results-section" id="resultsSection">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h2 style="font-size:20px; font-weight:700;">Resultado da Otimização</h2>
-                    <button class="btn btn-primary" onclick="exportarExcel()" style="width: auto; height: 40px; font-size: 14px;">
-                        <i class="fas fa-download"></i> Baixar Relatório
-                    </button>
+                    <button class="btn btn-secondary" onclick="exportarExcel()"><i class="fas fa-download"></i> Exportar Excel</button>
                 </div>
 
-                <div class="kpi-container">
-                    <div class="kpi-box">
-                        <div class="kpi-val" id="kpiTotal" style="color:var(--text-main)">0</div>
-                        <div class="kpi-lbl">Boxes Analisados</div>
+                <div class="stats-grid" id="statsGrid">
                     </div>
-                    <div class="kpi-box">
-                        <div class="kpi-val" id="kpiValid" style="color:var(--success)">0</div>
-                        <div class="kpi-lbl">Aprovados (100% Elim)</div>
-                    </div>
-                    <div class="kpi-box">
-                        <div class="kpi-val" id="kpiRejected" style="color:var(--danger)">0</div>
-                        <div class="kpi-lbl">Rejeitados (Mistos)</div>
-                    </div>
-                    <div class="kpi-box">
-                        <div class="kpi-val" id="kpiBlocks" style="color:var(--primary)">0</div>
-                        <div class="kpi-lbl">Blocos Gerados</div>
-                    </div>
-                </div>
 
                 <div class="blocks-container" id="blocksWrapper">
                     </div>
 
                 <div class="error-log" id="errorLog">
-                    <h4><i class="fas fa-exclamation-circle"></i> Boxes Impedidos de Eliminação</h4>
-                    <p style="font-size:13px; margin-bottom:10px;">Os seguintes boxes possuem documentos permanentes ou prazos vigentes (Qtd Eliminável ≠ Total Real):</p>
-                    <ul class="error-list" id="errorList"></ul>
+                    <h4 style="margin-bottom:10px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-exclamation-triangle"></i> Boxes Rejeitados (Parcialmente Elimináveis)
+                    </h4>
+                    <ul id="errorList" style="padding-left:20px; margin:0;"></ul>
                 </div>
-
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- GESTÃO DE ESTADO ---
+        // --- ESTADO ---
         let state = {
             fileElim: null,
             fileTot: null,
-            objective: 'docs', // 'docs' ou 'boxes'
+            objective: 'documentos',
             finalBlocks: []
         };
 
-        // --- UI INTERACTION ---
-        function setObjective(obj) {
-            state.objective = obj;
-            document.querySelectorAll('.obj-card').forEach(el => el.classList.remove('active'));
-            document.getElementById(obj === 'docs' ? 'objDocs' : 'objBoxes').classList.add('active');
-        }
+        // --- UPLOAD ---
+        setupUpload('fileElim', 'dropElim', 'iconElim', 'nameElim', 'fileElim');
+        setupUpload('fileTot', 'dropTot', 'iconTot', 'nameTot', 'fileTot');
 
-        // --- UPLOAD HANDLERS ---
-        setupUpload('fileEliminaveis', 'dropEliminaveis', 'nameEliminaveis', 'fileElim');
-        setupUpload('fileTotais', 'dropTotais', 'nameTotais', 'fileTot');
-
-        function setupUpload(inputId, dropId, nameId, stateKey) {
+        function setupUpload(inputId, dropId, iconId, nameId, stateKey) {
             const input = document.getElementById(inputId);
             const drop = document.getElementById(dropId);
             
-            input.addEventListener('change', (e) => processFile(e.target.files[0], drop, nameId, stateKey));
+            input.addEventListener('change', (e) => processFile(e.target.files[0], drop, iconId, nameId, stateKey));
             drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.style.borderColor = 'var(--primary)'; });
             drop.addEventListener('dragleave', () => { drop.style.borderColor = 'var(--border)'; });
-            drop.addEventListener('drop', (e) => { 
-                e.preventDefault(); 
-                processFile(e.dataTransfer.files[0], drop, nameId, stateKey); 
-            });
+            drop.addEventListener('drop', (e) => { e.preventDefault(); processFile(e.dataTransfer.files[0], drop, iconId, nameId, stateKey); });
         }
 
-        function processFile(file, dropEl, nameEl, stateKey) {
+        function processFile(file, dropEl, iconId, nameEl, stateKey) {
             if(!file) return;
-            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                // Lê cru (array de arrays)
-                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+                state[stateKey] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
                 
-                state[stateKey] = json;
-                
-                // UI Feedback
                 dropEl.classList.add('loaded');
+                document.getElementById(iconId).className = 'fas fa-check-circle upload-icon';
                 document.getElementById(nameEl).innerText = file.name;
                 
-                // Habilita botão se ambos carregados
                 if(state.fileElim && state.fileTot) {
-                    document.getElementById('btnProcessar').disabled = false;
+                    document.getElementById('configSection').classList.add('show');
+                    // Scroll suave
+                    setTimeout(() => document.getElementById('configSection').scrollIntoView({behavior:'smooth'}), 200);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // --- LÓGICA CORE (Algoritmo + Validação) ---
-        function executarOtimizacao() {
-            document.getElementById('loading').style.display = 'flex';
+        // --- UI ---
+        function selecionarObjetivo(obj) {
+            state.objective = obj;
+            document.querySelectorAll('.obj-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(obj === 'documentos' ? 'objDocs' : 'objBoxes').classList.add('active');
+        }
 
-            // Timeout para não travar UI
+        // --- LÓGICA PRINCIPAL ---
+        function iniciarOtimizacao() {
+            document.getElementById('loading').style.display = 'flex';
+            
             setTimeout(() => {
                 try {
-                    // 1. Extração de Dados (Com as regras de coluna específicas)
-                    const eliminaveisMap = extrairEliminaveis(state.fileElim);
-                    const totaisMap = extrairTotais(state.fileTot);
-
-                    // 2. Cross-Check (Validação)
-                    const validos = [];
-                    const rejeitados = [];
-
-                    for(const [box, qtdElim] of Object.entries(eliminaveisMap)) {
-                        const qtdTotal = totaisMap[box];
-                        
-                        if(qtdTotal === undefined) {
-                            rejeitados.push({ id: box, motivo: 'Não encontrado na planilha de Totais' });
-                        } else if(qtdElim === qtdTotal) {
-                            validos.push({ id: box, qtd: qtdElim });
-                        } else {
-                            rejeitados.push({ id: box, motivo: `Divergência: ${qtdElim} elim. / ${qtdTotal} total` });
+                    // 1. EXTRAÇÃO (Colunas Específicas Solicitadas)
+                    
+                    // Elimináveis: Col K (index 10), Row 2 (index 1)
+                    const mapElim = {};
+                    for(let i=1; i < state.fileElim.length; i++) {
+                        const row = state.fileElim[i];
+                        if(row && row[10] !== undefined) {
+                            const box = String(row[10]).trim();
+                            if(box) mapElim[box] = (mapElim[box] || 0) + 1;
                         }
                     }
 
-                    // 3. Otimização (Bin Packing)
-                    const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 20;
-                    const maxDocs = parseInt(document.getElementById('maxDocs').value) || 999999;
+                    // Totais: Col A (index 0), Col I (index 8), Row 4 (index 3)
+                    const mapTot = {};
+                    for(let i=3; i < state.fileTot.length; i++) {
+                        const row = state.fileTot[i];
+                        if(row) {
+                            const box = row[0];
+                            const total = row[8]; // Coluna I
+                            if(box !== undefined && total !== undefined) {
+                                const key = String(box).trim().replace(/\.0$/, ''); // Fix Excel float
+                                mapTot[key] = parseInt(total);
+                            }
+                        }
+                    }
+
+                    // 2. CROSS-CHECK (Sua Validação)
+                    const validos = [];
+                    const rejeitados = [];
                     
-                    const blocos = rodarBinPacking(validos, maxBoxes, maxDocs, state.objective);
+                    for(const [box, qtdElim] of Object.entries(mapElim)) {
+                        const qtdTotal = mapTot[box];
+                        if(qtdTotal === undefined) {
+                            rejeitados.push({ id: box, motivo: 'Box não encontrado na planilha de totais' });
+                        } else if(qtdElim === qtdTotal) {
+                            validos.push({ id: box, qtd: qtdElim });
+                        } else {
+                            rejeitados.push({ id: box, motivo: `Parcial: ${qtdElim} elim. de ${qtdTotal} total` });
+                        }
+                    }
+
+                    // 3. OTIMIZAÇÃO (Seu Algoritmo do HTML)
+                    // Ordenação conforme objetivo
+                    if(state.objective === 'documentos') {
+                        validos.sort((a,b) => b.qtd - a.qtd); // Max Docs: Maiores primeiro
+                    } else {
+                        validos.sort((a,b) => a.qtd - b.qtd); // Max Boxes: Menores primeiro (distribui melhor)
+                    }
+
+                    // Bin Packing Simples (Preenche blocos sequencialmente mas ordenados)
+                    const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 20;
+                    const blocos = [];
+                    let blocoAtual = [];
+
+                    validos.forEach(box => {
+                        if(blocoAtual.length >= maxBoxes) {
+                            blocos.push(blocoAtual);
+                            blocoAtual = [];
+                        }
+                        blocoAtual.push(box);
+                    });
+                    if(blocoAtual.length > 0) blocos.push(blocoAtual);
+                    
                     state.finalBlocks = blocos;
 
-                    // 4. Renderização
-                    renderizarResultados(Object.keys(eliminaveisMap).length, validos.length, rejeitados, blocos);
+                    // 4. RENDERIZAÇÃO
+                    renderResults(Object.keys(mapElim).length, validos, rejeitados, blocos);
+                    
+                    document.getElementById('uploadSection').style.display = 'none';
+                    document.getElementById('configSection').style.display = 'none';
+                    document.getElementById('resultsSection').classList.add('show');
 
-                } catch (e) {
-                    alert('Erro no processamento: ' + e.message);
-                    console.error(e);
+                } catch(e) {
+                    alert("Erro: " + e.message);
                 } finally {
                     document.getElementById('loading').style.display = 'none';
-                    document.getElementById('setupView').style.display = 'none';
-                    document.getElementById('resultsView').style.display = 'block';
                 }
             }, 500);
         }
 
-        // --- EXTRAÇÃO (Regras do Usuário) ---
-        function extrairEliminaveis(rows) {
-            const map = {};
-            // Coluna K = índice 10. Linha 2 = índice 1.
-            for(let i=1; i<rows.length; i++) {
-                const row = rows[i];
-                if(row && row[10] !== undefined) {
-                    const box = String(row[10]).trim();
-                    if(box) map[box] = (map[box] || 0) + 1;
-                }
-            }
-            return map;
-        }
+        function renderResults(totalInput, validos, rejeitados, blocos) {
+            // Stats
+            const totalDocsOtimizados = validos.reduce((a,b) => a + b.qtd, 0);
+            
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-lbl">Boxes Totais</div>
+                    <div class="stat-val" style="color:var(--text-main)">${totalInput}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">Boxes Aprovados</div>
+                    <div class="stat-val" style="color:var(--success)">${validos.length}</div>
+                </div>
+                 <div class="stat-card">
+                    <div class="stat-lbl">Docs Elimináveis</div>
+                    <div class="stat-val" style="color:var(--primary)">${totalDocsOtimizados}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">Blocos Gerados</div>
+                    <div class="stat-val" style="color:var(--text-main)">${blocos.length}</div>
+                </div>
+            `;
 
-        function extrairTotais(rows) {
-            const map = {};
-            // Coluna A = 0. Coluna I = 8. Linha 4 = índice 3.
-            for(let i=3; i<rows.length; i++) {
-                const row = rows[i];
-                if(row) {
-                    const box = row[0];
-                    const total = row[8];
-                    if(box !== undefined && total !== undefined) {
-                        // Limpeza robusta (remove .0 de floats convertidos)
-                        const key = String(box).trim().replace(/\.0$/, '');
-                        map[key] = parseInt(total);
-                    }
-                }
-            }
-            return map;
-        }
-
-        // --- ALGORITMO DE OTIMIZAÇÃO (Best Fit Decreasing) ---
-        function rodarBinPacking(items, capBox, capDocs, criterio) {
-            // Ordenação Estratégica
-            // Se o objetivo é 'docs': Começa pelos boxes mais cheios para encher o bloco rápido
-            // Se o objetivo é 'boxes': Também é melhor começar pelos cheios para encaixar os pequenos depois (Best Fit)
-            items.sort((a,b) => b.qtd - a.qtd);
-
-            const blocos = [];
-
-            items.forEach(item => {
-                // Tenta encontrar o "Melhor Bloco" existente (aquele que cabe e sobra menos espaço)
-                let bestBlock = null;
-                let minSpaceLeft = Infinity;
-
-                for(const bloco of blocos) {
-                    const currentBoxes = bloco.items.length;
-                    const currentDocs = bloco.totalDocs;
-
-                    if(currentBoxes < capBox && (currentDocs + item.qtd) <= capDocs) {
-                        const spaceLeft = (capDocs - (currentDocs + item.qtd)); // Heurística baseada em Docs
-                        if(spaceLeft < minSpaceLeft) {
-                            minSpaceLeft = spaceLeft;
-                            bestBlock = bloco;
-                        }
-                    }
-                }
-
-                if(bestBlock) {
-                    bestBlock.items.push(item);
-                    bestBlock.totalDocs += item.qtd;
-                } else {
-                    // Cria novo bloco
-                    blocos.push({
-                        id: blocos.length + 1,
-                        items: [item],
-                        totalDocs: item.qtd
-                    });
-                }
-            });
-
-            return blocos;
-        }
-
-        // --- RENDERIZAÇÃO ---
-        function renderizarResultados(total, valid, rejected, blocks) {
-            document.getElementById('kpiTotal').innerText = total;
-            document.getElementById('kpiValid').innerText = valid;
-            document.getElementById('kpiRejected').innerText = rejected.length;
-            document.getElementById('kpiBlocks').innerText = blocks.length;
-
-            // Render Blocos
+            // Blocos Grid
             const container = document.getElementById('blocksWrapper');
             container.innerHTML = '';
-            
-            blocks.forEach(bloco => {
-                const boxesStr = bloco.items.map(b => b.id).join(', ');
-                const html = `
-                    <div class="block-unit">
-                        <div class="block-head">
-                            <span class="block-title"><i class="fas fa-cube" style="color:var(--primary)"></i> Bloco #${bloco.id}</span>
-                            <span class="block-badge">${bloco.items.length} Boxes</span>
+            blocos.forEach((bloco, idx) => {
+                const totalDocs = bloco.reduce((acc, b) => acc + b.qtd, 0);
+                const list = bloco.map(b => b.id).join(', ');
+                
+                container.innerHTML += `
+                    <div class="block-card">
+                        <div class="block-header">
+                            <span>Bloco #${idx+1}</span>
+                            <span style="font-size:11px; background:var(--primary-light); color:var(--primary-dark); padding:2px 8px; border-radius:10px;">${bloco.length} Boxes</span>
                         </div>
-                        <div class="block-content">
-                            <div class="stat-row">
-                                <span>Total Docs:</span>
-                                <span class="stat-val">${bloco.totalDocs}</span>
+                        <div class="block-body">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span>Total Documentos:</span>
+                                <strong>${totalDocs}</strong>
                             </div>
-                            <div class="stat-row">
-                                <span>Densidade Média:</span>
-                                <span class="stat-val">${(bloco.totalDocs / bloco.items.length).toFixed(1)}</span>
-                            </div>
-                            <div class="box-list" title="${boxesStr}">${boxesStr}</div>
+                            <div class="box-list" title="${list}">${list}</div>
                         </div>
                     </div>
                 `;
-                container.innerHTML += html;
             });
 
-            // Render Erros
-            const errorLog = document.getElementById('errorLog');
+            // Erros
+            const errorDiv = document.getElementById('errorLog');
             const errorList = document.getElementById('errorList');
-            if(rejected.length > 0) {
-                errorLog.style.display = 'block';
-                errorList.innerHTML = rejected.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
+            if(rejeitados.length > 0) {
+                errorDiv.style.display = 'block';
+                errorList.innerHTML = rejeitados.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
             } else {
-                errorLog.style.display = 'none';
+                errorDiv.style.display = 'none';
             }
         }
 
-        // --- EXPORTAR ---
         function exportarExcel() {
             if(!state.finalBlocks.length) return;
-            
             const wb = XLSX.utils.book_new();
             const data = [];
             
-            state.finalBlocks.forEach(bloco => {
-                bloco.items.forEach(box => {
+            state.finalBlocks.forEach((bloco, idx) => {
+                bloco.forEach(box => {
                     data.push({
-                        'Bloco': bloco.id,
+                        'Bloco': idx + 1,
                         'Box': box.id,
                         'Qtd Documentos': box.qtd
                     });
@@ -540,7 +496,7 @@
 
             const ws = XLSX.utils.json_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Otimização");
-            XLSX.writeFile(wb, "Blocos_Eliminacao.xlsx");
+            XLSX.writeFile(wb, "Resultado_Otimizacao.xlsx");
         }
     </script>
 </body>
