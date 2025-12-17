@@ -331,12 +331,12 @@
             
             setTimeout(() => {
                 try {
-                    // 1. EXTRAÇÃO E MAPEAMENTO (Usando índices de coluna fixos e seguros)
+                    // 1. EXTRAÇÃO E MAPEAMENTO
                     const eliminaveisData = extrairDadosCompletos(state.fileElim);
                     const totaisData = extrairTotais(state.fileTot);
 
                     // 2. CROSS-CHECK (SEGURANÇA)
-                    const validBoxes = []; // Lista de objetos { id, qtd, docs[] }
+                    const validBoxes = [];
                     const rejectedBoxes = [];
                     
                     for(const [boxId, data] of Object.entries(eliminaveisData)) {
@@ -345,15 +345,15 @@
                         if(totalReal === undefined) {
                             rejectedBoxes.push({ id: boxId, motivo: 'Não encontrado na planilha de totais' });
                         } else if(data.qtd === totalReal) {
-                            // SUCESSO: Box é puramente eliminável
+                            // SUCESSO
                             validBoxes.push(data);
                         } else {
-                            // FALHA: Box misto
+                            // FALHA
                             rejectedBoxes.push({ id: boxId, motivo: `Divergência: ${data.qtd} elimináveis vs ${totalReal} total` });
                         }
                     }
 
-                    // 3. OTIMIZAÇÃO (Seu algoritmo original, adaptado)
+                    // 3. OTIMIZAÇÃO
                     const blocos = executarOtimizacao(validBoxes);
                     state.finalBlocks = blocos;
 
@@ -376,15 +376,15 @@
         // --- HELPERS DE EXTRAÇÃO ---
         function extrairDadosCompletos(rows) {
             const map = {};
-            // Índices baseados na sua confirmação anterior e no arquivo enviado
-            // Box=K(10), Setor=D(3), Cod=P(15)
+            // Índices Fixos: Box=K(10), Setor=D(3), Cod=Q(16)
             
             for(let i=1; i < rows.length; i++) {
                 const row = rows[i];
                 if(row && row[10] !== undefined) {
                     const box = String(row[10]).trim();
                     const setor = row[3] ? String(row[3]).trim() : 'ND';
-                    const cod = row[15] ? String(row[15]).trim() : 'ND';
+                    // CORREÇÃO AQUI: Coluna Q = Índice 16
+                    const cod = row[16] ? String(row[16]).trim() : 'ND';
 
                     if(box) {
                         if(!map[box]) {
@@ -392,7 +392,6 @@
                                 id: box, 
                                 qtd: 0, 
                                 documentos: [],
-                                // Sets para verificação rápida de constraints
                                 codigos: new Set(),
                                 setoresPorCod: {}
                             };
@@ -401,7 +400,6 @@
                         map[box].qtd++;
                         map[box].documentos.push({ SETOR: setor, COD: cod });
                         
-                        // Populate sets for algorithm
                         map[box].codigos.add(cod);
                         if(!map[box].setoresPorCod[cod]) map[box].setoresPorCod[cod] = new Set();
                         map[box].setoresPorCod[cod].add(setor);
@@ -428,22 +426,19 @@
             return map;
         }
 
-        // --- ALGORITMO ORIGINAL (Adaptado para usar os dados validados) ---
+        // --- ALGORITMO ORIGINAL ---
         function executarOtimizacao(boxes) {
-            // 1. Ordenação
             if(state.objective === 'documentos') {
-                boxes.sort((a, b) => b.qtd - a.qtd); // Decrescente de Docs
+                boxes.sort((a, b) => b.qtd - a.qtd);
             } else {
-                boxes.sort((a, b) => a.qtd - b.qtd); // Crescente de Docs (Boxes menores)
+                boxes.sort((a, b) => a.qtd - b.qtd);
             }
 
             const blocos = [];
 
-            // 2. Greedy Best Fit
             for (const box of boxes) {
                 let blocoCandidato = null;
 
-                // Tenta encontrar um bloco existente
                 for (const bloco of blocos) {
                     let valido = true;
 
@@ -469,14 +464,12 @@
                         }
                     }
 
-                    // Se passou em tudo, este bloco serve
                     if (valido) {
                         blocoCandidato = bloco;
-                        break; // First Fit (mais rápido e eficiente o suficiente)
+                        break;
                     }
                 }
 
-                // Adiciona ao bloco encontrado ou cria novo
                 if (blocoCandidato) {
                     adicionarBoxAoBloco(blocoCandidato, box);
                 } else {
@@ -497,7 +490,6 @@
             bloco.boxes.push(box);
             bloco.totalDocs += box.qtd;
             
-            // Merge metadata
             box.codigos.forEach(c => bloco.codigos.add(c));
             for(const [cod, setSetores] of Object.entries(box.setoresPorCod)) {
                 if(!bloco.setoresPorCod[cod]) bloco.setoresPorCod[cod] = new Set();
