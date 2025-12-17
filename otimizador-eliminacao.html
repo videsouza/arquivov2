@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação Seguro | Hub de Serviços</title>
+    <title>Otimizador de Eliminação Seguro (Multi-Abas) | Hub de Serviços</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -149,10 +149,8 @@
         /* Logs */
         .log-section { margin-top: 30px; display: none; }
         .log-box { padding: 20px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; }
-        
         .log-danger { background: #fff1f2; border: 1px solid #fecaca; color: #991b1b; }
         .log-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
-
         .log-title { font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 
         /* Loading */
@@ -172,14 +170,14 @@
     <div class="loading" id="loading">
         <div class="spinner"></div>
         <h3 style="color:var(--text-main)">Processando...</h3>
-        <p style="color:var(--text-sub)">1. Cross-Check de Totais<br>2. Algoritmo de Otimização</p>
+        <p style="color:var(--text-sub)">1. Lendo TODAS as abas<br>2. Cross-Check de Totais<br>3. Algoritmo de Otimização</p>
     </div>
 
     <div class="container">
         <div class="header">
             <div>
                 <h1><i class="fas fa-cubes"></i> Otimizador de Eliminação Seguro</h1>
-                <p>Verificação de Segurança + Algoritmo de Agrupamento Inteligente</p>
+                <p>Leitura Multi-Abas + Cross-Check + Agrupamento Inteligente</p>
             </div>
             <button class="btn-secondary" onclick="location.reload()" style="padding: 8px 16px; border-radius: 6px;">
                 <i class="fas fa-undo"></i> Reiniciar
@@ -194,7 +192,7 @@
                     <input type="file" id="fileElim" accept=".xlsx,.xls,.csv" hidden>
                     <i class="fas fa-file-alt upload-icon" id="iconElim"></i>
                     <h3 style="font-size:16px; font-weight:700;">Relatório de Elimináveis</h3>
-                    <p style="font-size:13px; color:var(--text-sub)">Docs a eliminar (Box na Col K)</p>
+                    <p style="font-size:13px; color:var(--text-sub)">Docs a eliminar (Lê todas as abas)</p>
                     <div id="nameElim" style="margin-top:10px; font-weight:600; color:var(--primary); font-size:12px;"></div>
                 </div>
 
@@ -264,7 +262,7 @@
                 <div class="log-section" id="crossCheckLog">
                     <div class="log-box log-danger">
                         <div class="log-title"><i class="fas fa-ban"></i> Boxes Bloqueados pelo Cross-Check (Divergência de Totais)</div>
-                        <p style="margin-bottom:10px;">Estes boxes foram removidos da otimização pois o total eliminável é diferente do total físico.</p>
+                        <p style="margin-bottom:10px;">Estes boxes foram removidos pois o total eliminável é diferente do total físico.</p>
                         <ul id="errorList" style="padding-left:20px; margin:0;"></ul>
                     </div>
                 </div>
@@ -272,7 +270,7 @@
                 <div class="log-section" id="complexLog">
                     <div class="log-box log-warning">
                         <div class="log-title"><i class="fas fa-exclamation-triangle"></i> Boxes Muito Complexos (Isolados)</div>
-                        <p style="margin-bottom:10px;">Estes boxes sozinhos já excedem os limites de restrição (Setores/Códigos) e não foram agrupados.</p>
+                        <p style="margin-bottom:10px;">Estes boxes excedem os limites (Setores/Códigos) mesmo sozinhos.</p>
                         <ul id="complexList" style="padding-left:20px; margin:0;"></ul>
                     </div>
                 </div>
@@ -308,17 +306,27 @@
             drop.addEventListener('drop', (e) => { e.preventDefault(); processFile(e.dataTransfer.files[0], drop, iconId, nameId, stateKey); });
         }
 
+        // --- LEITURA MULTI-ABAS ---
         function processFile(file, dropEl, iconId, nameEl, stateKey) {
             if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                state[stateKey] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+                
+                // LÓGICA DE CONCATENAÇÃO DE ABAS
+                let allRows = [];
+                workbook.SheetNames.forEach(sheetName => {
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                    allRows = allRows.concat(rows);
+                });
+
+                state[stateKey] = allRows;
                 
                 dropEl.classList.add('loaded');
                 document.getElementById(iconId).className = 'fas fa-check-circle upload-icon';
-                document.getElementById(nameEl).innerText = file.name;
+                document.getElementById(nameEl).innerText = file.name + ` (${workbook.SheetNames.length} abas)`;
                 
                 if(state.fileElim && state.fileTot) {
                     document.getElementById('configSection').classList.add('show');
@@ -350,11 +358,11 @@
             
             setTimeout(() => {
                 try {
-                    // 1. EXTRAÇÃO E MAPEAMENTO
+                    // 1. EXTRAÇÃO
                     const eliminaveisData = extrairDadosCompletos(state.fileElim);
                     const totaisData = extrairTotais(state.fileTot);
 
-                    // 2. CROSS-CHECK (SEGURANÇA)
+                    // 2. CROSS-CHECK
                     const validBoxes = [];
                     const rejectedBoxes = [];
                     
@@ -370,11 +378,11 @@
                         }
                     }
 
-                    // 3. OTIMIZAÇÃO + DETECÇÃO DE COMPLEXOS
+                    // 3. OTIMIZAÇÃO + COMPLEXIDADE
                     const { blocos, complexBoxes } = executarOtimizacao(validBoxes);
                     state.finalBlocks = blocos;
 
-                    // 4. RENDERIZAÇÃO
+                    // 4. RENDER
                     renderizarResultados(Object.keys(eliminaveisData).length, validBoxes, rejectedBoxes, blocos, complexBoxes);
                     
                     document.getElementById('uploadSection').style.display = 'none';
@@ -393,13 +401,17 @@
         // --- EXTRAÇÃO ---
         function extrairDadosCompletos(rows) {
             const map = {};
-            // Índices: Box=K(10), Setor=D(3), Cod=Q(16)
-            for(let i=1; i < rows.length; i++) {
+            // Índices: Box=K(10), Setor=D(3), Cod=Q(16) -> CORRIGIDO AQUI
+            for(let i=0; i < rows.length; i++) {
                 const row = rows[i];
+                // Verifica se parece uma linha de dados (Box na col 10)
                 if(row && row[10] !== undefined) {
                     const box = String(row[10]).trim();
+                    // Ignora cabeçalhos repetidos de outras abas se houver
+                    if(box.toUpperCase() === 'BOX' || box === '') continue;
+
                     const setor = row[3] ? String(row[3]).trim() : 'ND';
-                    const cod = row[16] ? String(row[16]).trim() : 'ND'; // Coluna Q
+                    const cod = row[16] ? String(row[16]).trim() : 'ND'; // Coluna Q = 16
 
                     if(box) {
                         if(!map[box]) {
@@ -422,13 +434,16 @@
 
         function extrairTotais(rows) {
             const map = {};
-            for(let i=3; i < rows.length; i++) {
+            // Box=A(0), Total=I(8)
+            for(let i=0; i < rows.length; i++) {
                 const row = rows[i];
-                if(row) {
-                    const box = row[0];
+                if(row && row[0] !== undefined) {
+                     const box = String(row[0]).trim();
+                     if(box.toUpperCase() === 'BOX' || box === '') continue; // Ignora header
+
                     const total = row[8];
-                    if(box !== undefined && total !== undefined) {
-                        const key = String(box).trim().replace(/\.0$/, '');
+                    if(total !== undefined) {
+                        const key = box.replace(/\.0$/, '');
                         map[key] = parseInt(total);
                     }
                 }
@@ -436,7 +451,7 @@
             return map;
         }
 
-        // --- ALGORITMO COM PROTEÇÃO DE COMPLEXIDADE ---
+        // --- ALGORITMO ---
         function executarOtimizacao(boxes) {
             if(state.objective === 'documentos') {
                 boxes.sort((a, b) => b.qtd - a.qtd);
@@ -448,7 +463,7 @@
             const complexBoxes = [];
 
             for (const box of boxes) {
-                // VERIFICAÇÃO 0: O Box sozinho já viola?
+                // VERIFICAÇÃO INICIAL: Box complexo demais sozinho?
                 let boxComplexo = false;
                 if (state.restrictions.Cod.active && box.codigos.size > state.restrictions.Cod.value) boxComplexo = true;
                 if (!boxComplexo && state.restrictions.Set.active) {
@@ -462,7 +477,7 @@
                 
                 if(boxComplexo) {
                     complexBoxes.push(box);
-                    continue; // Pula este box da otimização de agrupamento
+                    continue;
                 }
 
                 // TENTA AGRUPAR
@@ -470,13 +485,11 @@
                 for (const bloco of blocos) {
                     let valido = true;
 
-                    // Restrição: Códigos Únicos
                     if (state.restrictions.Cod.active) {
                         const uniaoCodigos = new Set([...bloco.codigos, ...box.codigos]);
                         if (uniaoCodigos.size > state.restrictions.Cod.value) valido = false;
                     }
 
-                    // Restrição: Setores por Código
                     if (valido && state.restrictions.Set.active) {
                         for (const cod of box.codigos) {
                             const setoresAtuais = bloco.setoresPorCod[cod] || new Set();
@@ -526,10 +539,9 @@
         function renderizarResultados(totalInput, validos, rejeitados, blocos, complexos) {
             const totalDocs = validos.reduce((a,b) => a + b.qtd, 0);
             
-            // Stats
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-lbl">Boxes Totais</div>
+                    <div class="stat-lbl">Boxes Lidos</div>
                     <div class="stat-val">${totalInput}</div>
                 </div>
                 <div class="stat-card">
@@ -546,7 +558,6 @@
                 </div>
             `;
 
-            // Blocos
             const wrapper = document.getElementById('blocksWrapper');
             wrapper.innerHTML = '';
             blocos.forEach(b => {
@@ -566,13 +577,11 @@
                 `;
             });
 
-            // Erros de Cross-Check
             if(rejeitados.length > 0) {
                 document.getElementById('crossCheckLog').style.display = 'block';
                 document.getElementById('errorList').innerHTML = rejeitados.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
             }
 
-            // Erros de Complexidade
             if(complexos.length > 0) {
                 document.getElementById('complexLog').style.display = 'block';
                 document.getElementById('complexList').innerHTML = complexos.map(b => `<li><strong>Box ${b.id}:</strong> Excede limites sozinho (${b.codigos.size} Códigos / Máx Setores atingido)</li>`).join('');
